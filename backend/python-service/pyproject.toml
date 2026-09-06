@@ -7,7 +7,10 @@ authors = [
     { name = "availe", email = "94802525+availe@users.noreply.github.com" }
 ]
 requires-python = ">=3.14.7"
-dependencies = []
+dependencies = [
+    "edgartools>=5.56.0",
+    "fastapi[standard]>=0.141.1",
+]
 
 [project.scripts]
 python-service = "python_service:main"
@@ -15,3 +18,10 @@ python-service = "python_service:main"
 [build-system]
 requires = ["uv_build>=0.12.10,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyrefly>=1.2.0",
+    "pytest>=9.1.1",
+    "ruff>=0.16.6",
+]
