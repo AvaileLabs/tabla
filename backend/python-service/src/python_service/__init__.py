@@ -1,2 +1,5 @@
 def main() -> None:
-    print("Hello from python-service!")
+    print("Hello World")
+
+if __name__ == "__main__":
+    main()
