@@ -20,11 +20,7 @@ class StockWatchlist {
     }
 
     fun add(stock: Stock): AddStockResult {
-        val normalizedStock = stock.copy(
-            ticker = stock.ticker.trim().uppercase(),
-            name = stock.name.trim(),
-            listingExchange = stock.listingExchange
-        )
+        val normalizedStock = stock.normalize()
 
         if (stocks.contains(normalizedStock)) return AddStockResult.ALREADY_EXISTS
 

@@ -19,6 +19,16 @@ data class Stock(
     val dividendHistory: List<Dividend>
 ) {
     val id: StockId get() = StockId(ticker, listingExchange)
+
+    fun normalize(): Stock {
+        return copy(
+            ticker = ticker.trim().uppercase(),
+            name = name.trim(),
+            listingExchange = listingExchange.trim(),
+            sector = sector?.trim(),
+            summary = summary?.trim()
+        )
+    }
 }
 
 data class Dividend(
