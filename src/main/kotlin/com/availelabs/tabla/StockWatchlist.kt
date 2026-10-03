@@ -1,19 +1,17 @@
 package com.availelabs.tabla
 
-enum class InstrumentType { COMMON_STOCK, ADR, ETF }
-
-data class StockId(val ticker: String, val listingExchange: String)
-
-data class Stock(
-    val ticker: String,
-    val name: String,
-    val listingExchange: String,
-    val instrumentType: InstrumentType
-) {
-    val id: StockId get() = StockId(ticker, listingExchange)
-}
-
 class StockWatchlist {
+    enum class AddStockResult {
+        ADDED,
+        INVALID_TICKER,
+        ALREADY_EXISTS
+    }
+
+    enum class RemoveStockResult {
+        REMOVED,
+        NOT_FOUND
+    }
+
     val stocks: List<Stock>
         field = mutableListOf()
 
@@ -21,18 +19,23 @@ class StockWatchlist {
         TODO()
     }
 
-    fun add(stock: Stock) {
+    fun add(stock: Stock): AddStockResult {
         val normalizedStock = stock.copy(
             ticker = stock.ticker.trim().uppercase(),
             name = stock.name.trim(),
             listingExchange = stock.listingExchange
         )
 
-        if (!isTickerValid(normalizedStock.ticker)) return
+        if (stocks.contains(normalizedStock)) return AddStockResult.ALREADY_EXISTS
+
+        if (!isTickerValid(normalizedStock.ticker)) return AddStockResult.INVALID_TICKER
         stocks.add(normalizedStock)
+        return AddStockResult.ADDED
     }
 
-    fun remove(stock: Stock) {
+    fun remove(stock: Stock): RemoveStockResult {
+        if (!stocks.contains(stock)) return RemoveStockResult.NOT_FOUND
         stocks.remove(stock)
+        return RemoveStockResult.REMOVED
     }
 }
