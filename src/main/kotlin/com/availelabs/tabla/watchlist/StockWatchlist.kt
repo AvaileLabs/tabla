@@ -1,6 +1,7 @@
 package com.availelabs.tabla.watchlist
 
 import com.availelabs.tabla.Stock
+import com.availelabs.tabla.StockId
 
 class StockWatchlist {
     enum class AddStockResult {
@@ -24,16 +25,15 @@ class StockWatchlist {
     fun add(stock: Stock): AddStockResult {
         val normalizedStock = stock.normalize()
 
-        if (stocks.contains(normalizedStock)) return AddStockResult.ALREADY_EXISTS
+        if (stocks.any { it.id == normalizedStock.id }) return AddStockResult.ALREADY_EXISTS
 
         if (!isTickerValid(normalizedStock.profile.ticker)) return AddStockResult.INVALID_TICKER
         stocks.add(normalizedStock)
         return AddStockResult.ADDED
     }
 
-    fun remove(stock: Stock): RemoveStockResult {
-        if (!stocks.contains(stock)) return RemoveStockResult.NOT_FOUND
-        stocks.remove(stock)
-        return RemoveStockResult.REMOVED
+    fun remove(id: StockId): RemoveStockResult {
+        val removed = stocks.removeIf { it.id == id }
+        return if (removed) RemoveStockResult.REMOVED else RemoveStockResult.NOT_FOUND
     }
 }

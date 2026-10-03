@@ -7,8 +7,6 @@ import kotlin.uuid.Uuid
 
 enum class InstrumentType { COMMON_STOCK, ADR, ETF }
 
-data class StockId(val ticker: String, val listingExchange: String)
-
 data class DividendHistory(
     val status: Status = Status.Unknown,
     val lastChecked: LocalDate?
@@ -41,7 +39,7 @@ data class StockProfile(
 }
 
 data class Stock(
-    val id: Uuid,
+    val id: StockId,
     val profile: StockProfile,
     val dividendHistory: DividendHistory
 ) {
@@ -60,3 +58,6 @@ data class Dividend(
     val amountPerShare: BigDecimal,
     val currency: Currency
 )
+
+@JvmInline
+value class StockId(val value: Uuid)

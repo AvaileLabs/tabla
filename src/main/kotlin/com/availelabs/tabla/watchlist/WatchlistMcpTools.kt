@@ -1,6 +1,7 @@
 package com.availelabs.tabla.watchlist
 
 import com.availelabs.tabla.Stock
+import com.availelabs.tabla.StockId
 import org.springframework.ai.mcp.annotation.McpTool
 import org.springframework.stereotype.Service
 
@@ -20,7 +21,7 @@ class WatchlistMcpTools(
         name = "remove_stock_from_watchlist",
         description = "Removes a stock, ADR, or ETF from the user's watchlist."
     )
-    fun removeStock(stock: Stock): StockWatchlist.RemoveStockResult {
-        return watchlistService.removeStock(stock)
+    fun removeStock(stockId: StockId): StockWatchlist.RemoveStockResult {
+        return watchlistService.removeStock(stockId)
     }
 }
