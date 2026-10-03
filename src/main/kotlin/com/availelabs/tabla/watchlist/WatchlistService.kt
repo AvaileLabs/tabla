@@ -1,5 +1,6 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.watchlist
 
+import com.availelabs.tabla.Stock
 import org.springframework.stereotype.Service
 
 @Service

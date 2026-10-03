@@ -1,4 +1,6 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.watchlist
+
+import com.availelabs.tabla.Stock
 
 class StockWatchlist {
     enum class AddStockResult {
