@@ -1,0 +1,21 @@
+[versions]
+kotlin = "2.4.20"
+springBoot = "4.2.0-M2"
+springAi = "2.1.0-M1"
+
+[libraries]
+springBoot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
+springAi-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "springAi" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+
+springBoot-starter = { module = "org.springframework.boot:spring-boot-starter" }
+springBoot-starterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
+springAi-starterMcpServerWebmvc = { module = "org.springframework.ai:spring-ai-starter-mcp-server-webmvc" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
+junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
