@@ -21,6 +21,8 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation(platform("org.springframework.ai:spring-ai-bom:2.1.0-M1"))
+    implementation("org.springframework.ai:spring-ai-starter-mcp-server-webmvc")
 }
 
 kotlin {
