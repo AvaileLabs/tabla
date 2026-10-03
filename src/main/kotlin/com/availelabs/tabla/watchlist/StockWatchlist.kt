@@ -26,7 +26,7 @@ class StockWatchlist {
 
         if (stocks.contains(normalizedStock)) return AddStockResult.ALREADY_EXISTS
 
-        if (!isTickerValid(normalizedStock.ticker)) return AddStockResult.INVALID_TICKER
+        if (!isTickerValid(normalizedStock.profile.ticker)) return AddStockResult.INVALID_TICKER
         stocks.add(normalizedStock)
         return AddStockResult.ADDED
     }
