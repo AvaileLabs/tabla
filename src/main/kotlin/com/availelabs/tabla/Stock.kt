@@ -2,12 +2,22 @@ package com.availelabs.tabla
 
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.Currency
-
+import java.util.*
 
 enum class InstrumentType { COMMON_STOCK, ADR, ETF }
 
 data class StockId(val ticker: String, val listingExchange: String)
+
+data class DividendHistory(
+    val status: Status = Status.Unknown,
+    val lastChecked: LocalDate?
+) {
+    sealed interface Status {
+        data object Unknown : Status
+        data object NeverPaid : Status
+        data class Paid(val history: List<Dividend>) : Status
+    }
+}
 
 data class Stock(
     val ticker: String,
@@ -16,7 +26,7 @@ data class Stock(
     val instrumentType: InstrumentType,
     val sector: String?,
     val summary: String?,
-    val dividendHistory: List<Dividend>
+    val dividendHistory: DividendHistory
 ) {
     val id: StockId get() = StockId(ticker, listingExchange)
 
