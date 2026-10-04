@@ -8,6 +8,24 @@ import kotlin.uuid.Uuid
 
 enum class InstrumentType { COMMON_STOCK, ADR, ETF }
 
+data class CashDividend(
+    val declarationDate: LocalDate?,
+    val exDate: LocalDate?,
+    val recordDate: LocalDate?,
+    val paymentDate: LocalDate?,
+    val amountPerShare: BigDecimal,
+    val currency: Currency
+)
+
+data class StockSplit(
+    val announcementDate: LocalDate?,
+    val exDate: LocalDate?,
+    val recordDate: LocalDate?,
+    val effectiveDate: LocalDate,
+    val numerator: Int,
+    val denominator: Int
+)
+
 data class DividendHistory(
     val status: Status = Status.Unknown,
     val lastChecked: LocalDate?
@@ -15,7 +33,18 @@ data class DividendHistory(
     sealed interface Status {
         data object Unknown : Status
         data object NeverPaid : Status
-        data class Paid(val history: List<Dividend>) : Status
+        data class Paid(val history: List<CashDividend>) : Status
+    }
+}
+
+data class StockSplitHistory(
+    val status: Status = Status.Unknown,
+    val lastChecked: LocalDate?
+) {
+    sealed interface Status {
+        data object Unknown : Status
+        data object NeverSplit : Status
+        data class Split(val history: List<StockSplit>) : Status
     }
 }
 
@@ -42,7 +71,8 @@ data class StockProfile(
 data class Stock(
     val id: StockId = StockId.generate(),
     val profile: StockProfile,
-    val dividendHistory: DividendHistory
+    val dividendHistory: DividendHistory,
+    val stockSplitHistory: StockSplitHistory
 ) {
     fun normalize(): Stock {
         return copy(
@@ -50,15 +80,6 @@ data class Stock(
         )
     }
 }
-
-data class Dividend(
-    val declarationDate: LocalDate?,
-    val exDate: LocalDate,
-    val recordDate: LocalDate?,
-    val paymentDate: LocalDate?,
-    val amountPerShare: BigDecimal,
-    val currency: Currency
-)
 
 @JvmInline
 value class StockId(val value: Uuid) {
