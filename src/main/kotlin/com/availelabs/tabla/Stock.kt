@@ -26,6 +26,11 @@ data class StockSplit(
     val denominator: Int
 )
 
+data class ShareCountSnapshot(
+    val date: LocalDate,
+    val sharesOutstanding: BigDecimal
+)
+
 data class DividendHistory(
     val status: Status = Status.Unknown,
     val lastChecked: LocalDate?
@@ -45,6 +50,16 @@ data class StockSplitHistory(
         data object Unknown : Status
         data object NeverSplit : Status
         data class Split(val history: List<StockSplit>) : Status
+    }
+}
+
+data class ShareCountHistory(
+    val status: Status = Status.Unknown,
+    val lastChecked: LocalDate?
+) {
+    sealed interface Status {
+        data object Unknown : Status
+        data class Known(val history: List<ShareCountSnapshot>) : Status
     }
 }
 
@@ -72,7 +87,8 @@ data class Stock(
     val id: StockId = StockId.generate(),
     val profile: StockProfile,
     val dividendHistory: DividendHistory,
-    val stockSplitHistory: StockSplitHistory
+    val stockSplitHistory: StockSplitHistory,
+    val shareCountHistory: ShareCountHistory
 ) {
     fun normalize(): Stock {
         return copy(
