@@ -33,7 +33,7 @@ data class ShareCountSnapshot(
 
 data class DividendHistory(
     val status: Status = Status.Unknown,
-    val lastChecked: LocalDate?
+    val lastUpdated: LocalDate?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -44,7 +44,7 @@ data class DividendHistory(
 
 data class StockSplitHistory(
     val status: Status = Status.Unknown,
-    val lastChecked: LocalDate?
+    val lastUpdated: LocalDate?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -55,7 +55,7 @@ data class StockSplitHistory(
 
 data class ShareCountHistory(
     val status: Status = Status.Unknown,
-    val lastChecked: LocalDate?
+    val lastUpdated: LocalDate?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -70,7 +70,7 @@ data class StockProfile(
     val instrumentType: InstrumentType,
     val sector: String?,
     val summary: String?,
-    val lastChecked: LocalDate?
+    val lastUpdated: LocalDate?
 ) {
     fun normalize(): StockProfile {
         return copy(
