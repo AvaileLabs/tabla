@@ -2,6 +2,13 @@ spring:
   application:
     name: tabla
 
+  docker:
+    compose:
+      start:
+        skip: never
+        arguments:
+          - --force-recreate
+
   threads:
     virtual:
       enabled: true

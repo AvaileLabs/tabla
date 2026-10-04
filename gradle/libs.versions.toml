@@ -10,6 +10,7 @@ kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin
 
 springBoot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 springBoot-starterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
+springBoot-dockerCompose = { module = "org.springframework.boot:spring-boot-docker-compose" }
 springAi-starterMcpServerWebmvc = { module = "org.springframework.ai:spring-ai-starter-mcp-server-webmvc" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }

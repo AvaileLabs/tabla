@@ -25,6 +25,7 @@ dependencies {
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
+    developmentOnly(libs.springBoot.dockerCompose)
     testRuntimeOnly(libs.junit.platformLauncher)
 }
 
