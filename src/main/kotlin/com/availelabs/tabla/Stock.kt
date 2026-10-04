@@ -8,6 +8,8 @@ import kotlin.uuid.Uuid
 
 enum class InstrumentType { COMMON_STOCK, ADR, ETF }
 
+enum class DataOrigin { DETERMINISTIC, LLM, BOTH }
+
 data class CashDividend(
     val declarationDate: LocalDate?,
     val exDate: LocalDate?,
@@ -33,7 +35,8 @@ data class ShareCountSnapshot(
 
 data class DividendHistory(
     val status: Status = Status.Unknown,
-    val lastUpdated: LocalDate?
+    val lastUpdated: LocalDate?,
+    val dataOrigin: DataOrigin?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -44,7 +47,8 @@ data class DividendHistory(
 
 data class StockSplitHistory(
     val status: Status = Status.Unknown,
-    val lastUpdated: LocalDate?
+    val lastUpdated: LocalDate?,
+    val dataOrigin: DataOrigin?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -55,7 +59,8 @@ data class StockSplitHistory(
 
 data class ShareCountHistory(
     val status: Status = Status.Unknown,
-    val lastUpdated: LocalDate?
+    val lastUpdated: LocalDate?,
+    val dataOrigin: DataOrigin?
 ) {
     sealed interface Status {
         data object Unknown : Status
@@ -70,7 +75,8 @@ data class StockProfile(
     val instrumentType: InstrumentType,
     val sector: String?,
     val summary: String?,
-    val lastUpdated: LocalDate?
+    val lastUpdated: LocalDate?,
+    val dataOrigin: DataOrigin?
 ) {
     fun normalize(): StockProfile {
         return copy(
