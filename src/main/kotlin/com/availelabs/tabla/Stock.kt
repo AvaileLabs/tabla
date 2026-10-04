@@ -3,6 +3,7 @@ package com.availelabs.tabla
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
+import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 enum class InstrumentType { COMMON_STOCK, ADR, ETF }
@@ -39,7 +40,7 @@ data class StockProfile(
 }
 
 data class Stock(
-    val id: StockId,
+    val id: StockId = StockId.generate(),
     val profile: StockProfile,
     val dividendHistory: DividendHistory
 ) {
@@ -60,4 +61,10 @@ data class Dividend(
 )
 
 @JvmInline
-value class StockId(val value: Uuid)
+value class StockId(val value: Uuid) {
+    companion object {
+        @OptIn(ExperimentalUuidApi::class)
+        fun generate(): StockId =
+            StockId(Uuid.generateV7())
+    }
+}
