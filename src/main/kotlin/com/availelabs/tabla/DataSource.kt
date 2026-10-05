@@ -16,14 +16,9 @@ data class DateCoverage(
 }
 
 data class SourceInfo(
-    val source: DataSource,
     val uri: URI,
     val retrievedAt: Instant
 )
-
-enum class DataSource {
-    NASDAQ_TRADER
-}
 
 data class Sourced<T>(
     val value: T,
