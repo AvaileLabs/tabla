@@ -3,6 +3,7 @@ kotlin = "2.4.20"
 springBoot = "4.2.0-M2"
 springAi = "2.1.0-M1"
 springModulith = "2.2.0-M2"
+dataframe = "1.0.0-rc01"
 
 [libraries]
 springBoot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -18,6 +19,7 @@ springAi-starterMcpServerWebmvc = { module = "org.springframework.ai:spring-ai-s
 springModulith-starterCore = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 springModulith-starterTest = { module = "org.springframework.modulith:spring-modulith-starter-test" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = "dataframe" }
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 

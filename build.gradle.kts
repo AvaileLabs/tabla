@@ -25,6 +25,7 @@ dependencies {
     implementation(libs.springAi.starterMcpServerWebmvc)
     implementation(libs.kotlin.reflect)
     implementation(libs.springModulith.starterCore)
+    implementation(libs.kotlinx.dataframe)
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
