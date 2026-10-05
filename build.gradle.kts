@@ -17,14 +17,18 @@ java {
 dependencies {
     implementation(platform(libs.springBoot.bom))
     implementation(platform(libs.springAi.bom))
+    implementation(platform(libs.springModulith.bom))
     implementation(platform(libs.kotlin.bom))
 
     implementation(libs.springBoot.starter)
+    implementation(libs.springBoot.starterRestClient)
     implementation(libs.springAi.starterMcpServerWebmvc)
     implementation(libs.kotlin.reflect)
+    implementation(libs.springModulith.starterCore)
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
+    testImplementation(libs.springModulith.starterTest)
     developmentOnly(libs.springBoot.dockerCompose)
     testRuntimeOnly(libs.junit.platformLauncher)
 }
