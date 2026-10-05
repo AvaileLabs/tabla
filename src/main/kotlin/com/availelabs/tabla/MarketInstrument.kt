@@ -28,8 +28,8 @@ data class Listing private constructor(
             val normalizedTicker = ticker.trim().uppercase()
             val normalizedExchange = exchange.trim().uppercase()
 
-            require(normalizedTicker.isNotEmpty())
-            require(normalizedExchange.isNotEmpty())
+            require(normalizedTicker.isNotEmpty()) { "Ticker cannot be empty" }
+            require(normalizedExchange.isNotEmpty()) { "Exchange cannot be empty" }
 
             return Listing(
                 ticker = normalizedTicker,
