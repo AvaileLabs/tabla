@@ -48,12 +48,14 @@ class DataIngestor {
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
+            val nasdaqListingsRetrievedAt = Clock.System.now()
 
             val rawOtherUsListing = DataFrame.readCsv(
                 fileOrUrl = otherUsListedSecuritiesSource.toString(),
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
+            val otherUsListingsRetrievedAt = Clock.System.now()
 
             val (nasdaqListing, nasdaqFileCreationTime) = parseListingTable<NasdaqListing>(rawNasdaqListing)
             val (otherUsListing, otherUsFileCreationTime) = parseListingTable<OtherUsListing>(rawOtherUsListing)
@@ -72,7 +74,7 @@ class DataIngestor {
                             ).sourcedBy(
                                 sourceInfo = SourceInfo(
                                     uri = nasdaqListedSecuritiesSource,
-                                    retrievedAt = Clock.System.now(),
+                                    retrievedAt = nasdaqListingsRetrievedAt,
                                     createdAt = SourceTimestamp.DateTime(nasdaqFileCreationTime)
                                 )
                             ),
