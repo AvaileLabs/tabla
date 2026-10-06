@@ -1,8 +1,13 @@
 package com.availelabs.tabla
 
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
-import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.api.ParserOptions
+import org.jetbrains.kotlinx.dataframe.api.cast
+import org.jetbrains.kotlinx.dataframe.api.drop
+import org.jetbrains.kotlinx.dataframe.api.single
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
@@ -40,33 +45,27 @@ class DataIngestor {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
-            val rawNasdaqListings = DataFrame.readCsv(
+            val rawNasdaqListing = DataFrame.readCsv(
                 fileOrUrl = nasdaqListedSecuritiesSource,
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
 
-            val nasdaqListings = rawNasdaqListings
-                .drop { row -> row[0].toString().startsWith("File Creation Time:") }
-                .cast<NasdaqListing>(verify = true)
-
-            val otherUsListings = DataFrame.readCsv(
+            val rawOtherUsListing = DataFrame.readCsv(
                 fileOrUrl = otherUsListedSecuritiesSource,
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
-                .drop { row -> row[0].toString().startsWith("File Creation Time:") }
-                .cast<OtherUsListing>(verify = true)
 
-            nasdaqListings.filter { Symbol == "NA" }
-                .print(rowsLimit = null, valueLimit = null)
+            val (nasdaqListing, nasdaqFileCreationTime) = parseListingTable(rawNasdaqListing, NasdaqListing::class)
+            val (otherUsListing, otherUsFileCreationTime) = parseListingTable(rawOtherUsListing, OtherUsListing::class)
 
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
         }
     }
 
-    private fun parseListingTable(rawTable: DataFrame<*>, schema: KClass<*>): Pair<DataFrame<*>, String> {
+    private fun parseListingTable(rawTable: DataFrame<*>, schema: KClass<*>): Pair<DataFrame<*>, LocalDateTime> {
         require(
             schema == NasdaqListing::class || schema == OtherUsListing::class
         ) {
@@ -74,9 +73,10 @@ class DataIngestor {
         }
 
         val prefix = "File Creation Time:"
-        val fileCreationTime = rawTable
+        val rawFileCreationTime = rawTable
             .single { row -> row.values().first().toString().startsWith(prefix) }
             .values().first().toString().removePrefix(prefix).trim()
+        val fileCreationTime = parseCreationTime(rawFileCreationTime)
 
         val normalizedTable = rawTable
             .drop { row -> row.values().first().toString().startsWith(prefix) }
@@ -93,6 +93,19 @@ class DataIngestor {
         }
 
         return verifiedTable to fileCreationTime
+    }
+
+    private fun parseCreationTime(creationTime: String): LocalDateTime {
+        val format = LocalDateTime.Format {
+            monthNumber()
+            day()
+            year()
+            hour()
+            char(':')
+            minute()
+        }
+
+        return format.parse(creationTime)
     }
 }
 
