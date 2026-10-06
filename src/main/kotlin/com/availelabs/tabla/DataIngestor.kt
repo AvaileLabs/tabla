@@ -109,7 +109,17 @@ class DataIngestor {
                     )
                 }
 
-            print(etfs)
+            println(etfs.size)
+            val etfTable = dataFrameOf(
+                "Ticker" to etfs.map { it.primaryListing.value.ticker },
+                "Name" to listOf(nasdaqListing, otherUsListing).flatMap { listing ->
+                    listing
+                        .filter { it["ETF"] == 'Y' }
+                        .map { it["Security Name"] }
+                },
+                "Exchange" to etfs.map { it.primaryListing.value.exchange.name },
+            )
+            etfTable.print(rowsLimit = null, valueLimit = null)
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
             throw e
