@@ -27,6 +27,8 @@ dependencies {
     implementation(libs.kotlin.reflect)
     implementation(libs.springModulith.starterCore)
     implementation(libs.kotlinx.dataframe)
+    implementation(libs.kotlinx.datetime)
+
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
