@@ -19,7 +19,6 @@ dependencies {
     implementation(platform(libs.springBoot.bom))
     implementation(platform(libs.springAi.bom))
     implementation(platform(libs.springModulith.bom))
-    implementation(platform(libs.kotlin.bom))
 
     implementation(libs.springBoot.starter)
     implementation(libs.springBoot.starterRestClient)
@@ -28,7 +27,6 @@ dependencies {
     implementation(libs.springModulith.starterCore)
     implementation(libs.kotlinx.dataframe)
     implementation(libs.kotlinx.datetime)
-
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)

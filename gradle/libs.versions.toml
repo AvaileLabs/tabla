@@ -10,7 +10,6 @@ datetime = "0.8.0"
 springBoot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
 springAi-bom = { module = "org.springframework.ai:spring-ai-bom", version.ref = "springAi" }
 springModulith-bom = { module = "org.springframework.modulith:spring-modulith-bom", version.ref = "springModulith" }
-kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 
 springBoot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 springBoot-starterRestClient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
