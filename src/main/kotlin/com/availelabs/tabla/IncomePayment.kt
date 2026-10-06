@@ -1,7 +1,7 @@
 package com.availelabs.tabla
 
+import kotlinx.datetime.LocalDate
 import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.*
 
 sealed interface IncomePayment
