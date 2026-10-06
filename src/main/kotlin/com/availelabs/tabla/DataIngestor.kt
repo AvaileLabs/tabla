@@ -10,7 +10,6 @@ import org.jetbrains.kotlinx.dataframe.api.drop
 import org.jetbrains.kotlinx.dataframe.api.single
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
-import kotlin.reflect.KClass
 
 @DataSchema
 interface NasdaqListing {
@@ -57,19 +56,20 @@ class DataIngestor {
                 parserOptions = markEmptyFieldsAsNull,
             )
 
-            val (nasdaqListing, nasdaqFileCreationTime) = parseListingTable(rawNasdaqListing, NasdaqListing::class)
-            val (otherUsListing, otherUsFileCreationTime) = parseListingTable(rawOtherUsListing, OtherUsListing::class)
+            val (nasdaqListing, nasdaqFileCreationTime) = parseListingTable<NasdaqListing>(rawNasdaqListing)
+            val (otherUsListing, otherUsFileCreationTime) = parseListingTable<OtherUsListing>(rawOtherUsListing)
 
+            val etfs = mutableListOf<Etf>()
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
         }
     }
 
-    private fun parseListingTable(rawTable: DataFrame<*>, schema: KClass<*>): Pair<DataFrame<*>, LocalDateTime> {
+    private inline fun <reified T> parseListingTable(rawTable: DataFrame<*>): Pair<DataFrame<T>, LocalDateTime> {
         require(
-            schema == NasdaqListing::class || schema == OtherUsListing::class
+            T::class == NasdaqListing::class || T::class == OtherUsListing::class
         ) {
-            "Unsupported schema: $schema. Supported schemas are NasdaqListing and OtherUsListing."
+            "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
         }
 
         val prefix = "File Creation Time:"
@@ -81,16 +81,7 @@ class DataIngestor {
         val normalizedTable = rawTable
             .drop { row -> row.values().first().toString().startsWith(prefix) }
 
-        val verifiedTable = when (schema) {
-            NasdaqListing::class ->
-                normalizedTable.cast<NasdaqListing>(verify = true)
-
-            OtherUsListing::class ->
-                normalizedTable.cast<OtherUsListing>(verify = true)
-
-            else ->
-                error("Unsupported schema: $schema")
-        }
+        val verifiedTable = normalizedTable.cast<T>(verify = true)
 
         return verifiedTable to fileCreationTime
     }
