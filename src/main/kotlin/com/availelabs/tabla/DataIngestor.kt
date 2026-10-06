@@ -87,6 +87,29 @@ class DataIngestor {
                         )
                     )
                 }
+
+            otherUsListing
+                .filter { ETF == 'Y' }
+                .forEach { row ->
+                    etfs.add(
+                        Etf(
+                            instrumentId = InstrumentId.generate(),
+                            primaryListing = Listing.of(
+                                ticker = row.`ACT Symbol`,
+                                exchange = exchangeOf(row.Exchange)
+                            ).sourcedBy(
+                                sourceInfo = SourceInfo(
+                                    uri = nasdaqListedSecuritiesSource,
+                                    retrievedAt = nasdaqListingsRetrievedAt,
+                                    createdAt = SourceTimestamp.DateTime(nasdaqFileCreationTime)
+                                )
+                            ),
+                            incomeHistory = HistoricalData(segments = emptyList())
+                        )
+                    )
+                }
+
+            print(etfs)
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
         }
