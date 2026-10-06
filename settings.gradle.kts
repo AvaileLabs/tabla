@@ -5,6 +5,8 @@ pluginManagement {
     }
 }
 
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
 rootProject.name = "tabla"
 
 dependencyResolutionManagement {
