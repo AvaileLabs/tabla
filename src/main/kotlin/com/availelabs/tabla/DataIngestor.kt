@@ -10,28 +10,31 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import kotlin.time.Clock
 
-@DataSchema
-interface NasdaqListing {
-    val Symbol: String
-    val `Security Name`: String
-    val `Market Category`: Char
-    val `Test Issue`: Char
-    val `Financial Status`: Char
-    val `Round Lot Size`: Int
-    val ETF: Char
-    val NextShares: Char
-}
+interface ListingSchema {
 
-@DataSchema
-interface OtherUsListing {
-    val `ACT Symbol`: String
-    val `Security Name`: String
-    val Exchange: Char
-    val `CQS Symbol`: String
-    val ETF: Char
-    val `Round Lot Size`: Int
-    val `Test Issue`: Char
-    val `NASDAQ Symbol`: String
+    @DataSchema
+    interface NasdaqListing : ListingSchema {
+        val Symbol: String
+        val `Security Name`: String
+        val `Market Category`: Char
+        val `Test Issue`: Char
+        val `Financial Status`: Char
+        val `Round Lot Size`: Int
+        val ETF: Char
+        val NextShares: Char
+    }
+
+    @DataSchema
+    interface OtherUsListing : ListingSchema {
+        val `ACT Symbol`: String
+        val `Security Name`: String
+        val Exchange: Char
+        val `CQS Symbol`: String
+        val ETF: Char
+        val `Round Lot Size`: Int
+        val `Test Issue`: Char
+        val `NASDAQ Symbol`: String
+    }
 }
 
 class DataIngestor {
@@ -57,8 +60,10 @@ class DataIngestor {
             )
             val otherUsListingsRetrievedAt = Clock.System.now()
 
-            val (nasdaqListing, nasdaqFileCreationTime) = parseListingTable<NasdaqListing>(rawNasdaqListing)
-            val (otherUsListing, otherUsFileCreationTime) = parseListingTable<OtherUsListing>(rawOtherUsListing)
+            val (nasdaqListing, nasdaqFileCreationTime) =
+                parseListingTable<ListingSchema.NasdaqListing>(rawNasdaqListing)
+            val (otherUsListing, otherUsFileCreationTime) =
+                parseListingTable<ListingSchema.OtherUsListing>(rawOtherUsListing)
 
             val etfs = mutableListOf<Etf>()
 
@@ -87,9 +92,10 @@ class DataIngestor {
         }
     }
 
-    private inline fun <reified T> parseListingTable(rawTable: DataFrame<*>): Pair<DataFrame<T>, LocalDateTime> {
+    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: DataFrame<*>): Pair<DataFrame<T>, LocalDateTime> {
+        // Whitelisted schemas; do not add a new schema unless it has the same structure, which is unlikely.
         require(
-            T::class == NasdaqListing::class || T::class == OtherUsListing::class
+            T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
         ) {
             "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
         }
