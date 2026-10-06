@@ -50,3 +50,12 @@ data class Etf(
     override val primaryListing: Sourced<Listing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
+
+enum class Exchange {
+    NASDAQ,
+    NYSE_AMERICAN,
+    NYSE,
+    NYSE_ARCA,
+    BATS,
+    IEX,
+}
