@@ -94,12 +94,14 @@ class DataIngestor {
 
     private inline fun <reified T : ListingSchema> parseListingTable(rawTable: DataFrame<*>): Pair<DataFrame<T>, LocalDateTime> {
         // Whitelisted schemas; do not add a new schema unless it has a compatible structure, which is unlikely.
+        val testIssueColumn = "Test Issue"
+
         require(
             T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
         ) {
             "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
         }
-        require("Test Issue" in rawTable.columnNames()) { "Missing required column: \"Test Issue\"." }
+        require(testIssueColumn in rawTable.columnNames()) { "Missing required column: \"$testIssueColumn\"." }
 
         val prefix = "File Creation Time:"
         val rawFileCreationTime = rawTable
@@ -109,7 +111,7 @@ class DataIngestor {
 
         val normalizedTable = rawTable
             .drop { row -> row.values().first().toString().startsWith(prefix) }
-            .drop { row -> row["Test Issue"]?.toString() == "Y" }
+            .drop { row -> row[testIssueColumn].toString() == "Y" }
             .cast<T>(verify = true)
 
         return normalizedTable to fileCreationTime
