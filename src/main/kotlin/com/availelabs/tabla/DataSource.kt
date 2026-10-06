@@ -1,8 +1,8 @@
 package com.availelabs.tabla
 
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import java.net.URI
-import java.time.LocalDate
-import java.time.LocalDateTime
 import kotlin.time.Instant
 
 data class DateCoverage(
@@ -10,7 +10,7 @@ data class DateCoverage(
     val to: LocalDate,
 ) {
     init {
-        require(!to.isBefore(from)) {
+        require(to >= from) {
             "Coverage end date must not precede start date"
         }
     }

@@ -4,12 +4,11 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
-import org.jetbrains.kotlinx.dataframe.api.ParserOptions
-import org.jetbrains.kotlinx.dataframe.api.cast
-import org.jetbrains.kotlinx.dataframe.api.drop
-import org.jetbrains.kotlinx.dataframe.api.single
+import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
+import java.net.URI
+import kotlin.time.Clock
 
 @DataSchema
 interface NasdaqListing {
@@ -37,21 +36,21 @@ interface OtherUsListing {
 
 class DataIngestor {
     private val logger = LoggerFactory.getLogger(DataIngestor::class.java)
-    private val nasdaqListedSecuritiesSource = "https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
-    private val otherUsListedSecuritiesSource = "https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
+    private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
+    private val otherUsListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt")
 
     fun ingestTickers() {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
             val rawNasdaqListing = DataFrame.readCsv(
-                fileOrUrl = nasdaqListedSecuritiesSource,
+                fileOrUrl = nasdaqListedSecuritiesSource.toString(),
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
 
             val rawOtherUsListing = DataFrame.readCsv(
-                fileOrUrl = otherUsListedSecuritiesSource,
+                fileOrUrl = otherUsListedSecuritiesSource.toString(),
                 delimiter = '|',
                 parserOptions = markEmptyFieldsAsNull,
             )
@@ -60,6 +59,27 @@ class DataIngestor {
             val (otherUsListing, otherUsFileCreationTime) = parseListingTable<OtherUsListing>(rawOtherUsListing)
 
             val etfs = mutableListOf<Etf>()
+
+            nasdaqListing
+                .filter { ETF == 'Y' }
+                .forEach { row ->
+                    etfs.add(
+                        Etf(
+                            instrumentId = InstrumentId.generate(),
+                            primaryListing = Listing.of(
+                                ticker = row.Symbol,
+                                exchange = Exchange.NASDAQ
+                            ).sourcedBy(
+                                sourceInfo = SourceInfo(
+                                    uri = nasdaqListedSecuritiesSource,
+                                    retrievedAt = Clock.System.now(),
+                                    createdAt = SourceTimestamp.DateTime(nasdaqFileCreationTime)
+                                )
+                            ),
+                            incomeHistory = HistoricalData(segments = emptyList())
+                        )
+                    )
+                }
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
         }
@@ -80,10 +100,9 @@ class DataIngestor {
 
         val normalizedTable = rawTable
             .drop { row -> row.values().first().toString().startsWith(prefix) }
+            .cast<T>(verify = true)
 
-        val verifiedTable = normalizedTable.cast<T>(verify = true)
-
-        return verifiedTable to fileCreationTime
+        return normalizedTable to fileCreationTime
     }
 
     private fun parseCreationTime(creationTime: String): LocalDateTime {
@@ -98,6 +117,16 @@ class DataIngestor {
 
         return format.parse(creationTime)
     }
+
+    private fun exchangeOf(code: Char): Exchange =
+        when (code) {
+            'A' -> Exchange.NYSE_AMERICAN
+            'N' -> Exchange.NYSE
+            'P' -> Exchange.NYSE_ARCA
+            'Z' -> Exchange.BATS
+            'V' -> Exchange.IEX
+            else -> error("Unsupported exchange code: $code")
+        }
 }
 
 fun main() {
