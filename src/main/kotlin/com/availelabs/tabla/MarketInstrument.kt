@@ -54,6 +54,8 @@ enum class Exchange {
     NYSE_AMERICAN,
     NYSE,
     NYSE_ARCA,
-    BATS,
+    CBOE_BZX,
     IEX,
+    TXSE,
+    NYSE_TEXAS,
 }

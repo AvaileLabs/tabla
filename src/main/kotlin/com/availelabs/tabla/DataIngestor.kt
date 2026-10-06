@@ -99,9 +99,9 @@ class DataIngestor {
                                 exchange = exchangeOf(row.Exchange)
                             ).sourcedBy(
                                 sourceInfo = SourceInfo(
-                                    uri = nasdaqListedSecuritiesSource,
-                                    retrievedAt = nasdaqListingsRetrievedAt,
-                                    createdAt = SourceTimestamp.DateTime(nasdaqFileCreationTime)
+                                    uri = otherUsListedSecuritiesSource,
+                                    retrievedAt = otherUsListingsRetrievedAt,
+                                    createdAt = SourceTimestamp.DateTime(otherUsFileCreationTime)
                                 )
                             ),
                             incomeHistory = HistoricalData(segments = emptyList())
@@ -112,6 +112,7 @@ class DataIngestor {
             print(etfs)
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
+            throw e
         }
     }
 
@@ -156,9 +157,11 @@ class DataIngestor {
     private fun exchangeOf(code: Char): Exchange =
         when (code) {
             'A' -> Exchange.NYSE_AMERICAN
+            'F' -> Exchange.TXSE
+            'M' -> Exchange.NYSE_TEXAS
             'N' -> Exchange.NYSE
             'P' -> Exchange.NYSE_ARCA
-            'Z' -> Exchange.BATS
+            'Z' -> Exchange.CBOE_BZX
             'V' -> Exchange.IEX
             else -> error("Unsupported exchange code: $code")
         }
