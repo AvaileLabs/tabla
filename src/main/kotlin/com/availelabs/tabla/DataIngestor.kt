@@ -75,6 +75,7 @@ class DataIngestor {
                             instrumentId = InstrumentId.generate(),
                             primaryListing = Listing.of(
                                 ticker = row.Symbol,
+                                name = row.`Security Name`,
                                 exchange = Exchange.NASDAQ
                             ).sourcedBy(
                                 sourceInfo = SourceInfo(
@@ -96,6 +97,7 @@ class DataIngestor {
                             instrumentId = InstrumentId.generate(),
                             primaryListing = Listing.of(
                                 ticker = row.`ACT Symbol`,
+                                name = row.`Security Name`,
                                 exchange = exchangeOf(row.Exchange)
                             ).sourcedBy(
                                 sourceInfo = SourceInfo(
@@ -112,11 +114,7 @@ class DataIngestor {
             println(etfs.size)
             val etfTable = dataFrameOf(
                 "Ticker" to etfs.map { it.primaryListing.value.ticker },
-                "Name" to listOf(nasdaqListing, otherUsListing).flatMap { listing ->
-                    listing
-                        .filter { it["ETF"] == 'Y' }
-                        .map { it["Security Name"] }
-                },
+                "Name" to etfs.map { it.primaryListing.value.name },
                 "Exchange" to etfs.map { it.primaryListing.value.exchange.name },
             )
             etfTable.print(rowsLimit = null, valueLimit = null)

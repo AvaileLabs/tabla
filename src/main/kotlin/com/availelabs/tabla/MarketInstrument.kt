@@ -21,16 +21,20 @@ value class InstrumentId(val value: Uuid) {
 @ConsistentCopyVisibility
 data class Listing private constructor(
     val ticker: String,
+    val name: String,
     val exchange: Exchange
 ) {
     companion object {
-        fun of(ticker: String, exchange: Exchange): Listing {
+        fun of(ticker: String, name: String, exchange: Exchange): Listing {
             val normalizedTicker = ticker.trim().uppercase()
+            val normalizedName = name.trim()
 
             require(normalizedTicker.isNotEmpty()) { "Ticker cannot be empty" }
+            require(normalizedName.isNotEmpty()) { "Name cannot be empty" }
 
             return Listing(
                 ticker = normalizedTicker,
+                name = normalizedName,
                 exchange = exchange
             )
         }
