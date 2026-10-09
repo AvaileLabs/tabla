@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.net.URI
 import kotlin.time.Clock
+import kotlin.time.Instant
 
 // Do not further extend or alter ListingSchema.
 @DataSchema
@@ -43,6 +44,25 @@ class TickerIngestor {
     private val logger = LoggerFactory.getLogger(TickerIngestor::class.java)
     private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
     private val otherUsListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt")
+
+    private data class RetrievedListingTable(
+        val value: DataFrame<*>,
+        val uri: URI,
+        val retrievedAt: Instant
+    )
+
+    private class ParsedListingTable<T : ListingSchema>(
+        val value: DataFrame<T>,
+        uri: URI,
+        retrievedAt: Instant,
+        fileCreationTime: LocalDateTime
+    ) {
+        val sourceInfo = SourceInfo(
+            uri = uri,
+            retrievedAt = retrievedAt,
+            createdAt = SourceTimestamp.DateTime(fileCreationTime)
+        )
+    }
 
     fun ingest() {
         try {
@@ -79,17 +99,21 @@ class TickerIngestor {
         }
     }
 
-    private fun readListingTable(source: URI, parserOptions: ParserOptions): Sourced<DataFrame<*>> {
+    private fun readListingTable(source: URI, parserOptions: ParserOptions): RetrievedListingTable {
         val rawTable = DataFrame.readCsv(
             fileOrUrl = source.toString(),
             delimiter = '|',
             parserOptions = parserOptions,
         )
-        return rawTable.sourcedBy(SourceInfo(uri = source, retrievedAt = Clock.System.now(), createdAt = null))
+        return RetrievedListingTable(
+            value = rawTable,
+            uri = source,
+            retrievedAt = Clock.System.now()
+        )
     }
 
     private fun <T : ListingSchema> MutableList<Etf>.addEtfs(
-        listing: Sourced<DataFrame<T>>,
+        listing: ParsedListingTable<T>,
         ticker: (DataRow<T>) -> String,
         exchange: (DataRow<T>) -> Exchange
     ) {
@@ -108,7 +132,7 @@ class TickerIngestor {
         }
     }
 
-    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: Sourced<DataFrame<*>>): Sourced<DataFrame<T>> {
+    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: RetrievedListingTable): ParsedListingTable<T> {
         // Whitelisted schemas; do not add new schemas.
         require(
             T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
@@ -118,8 +142,11 @@ class TickerIngestor {
 
         val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
 
-        return normalizedTable.cast<T>(verify = true).sourcedBy(
-            rawTable.sourceInfo.copy(createdAt = SourceTimestamp.DateTime(fileCreationTime))
+        return ParsedListingTable(
+            value = normalizedTable.cast<T>(verify = true),
+            uri = rawTable.uri,
+            retrievedAt = rawTable.retrievedAt,
+            fileCreationTime = fileCreationTime
         )
     }
 
