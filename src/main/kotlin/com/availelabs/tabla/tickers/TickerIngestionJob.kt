@@ -1,4 +1,4 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.tickers
 
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner

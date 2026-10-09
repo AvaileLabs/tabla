@@ -1,5 +1,6 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.tickers
 
+import com.availelabs.tabla.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame

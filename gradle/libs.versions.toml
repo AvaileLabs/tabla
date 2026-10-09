@@ -20,6 +20,7 @@ springBoot-dockerCompose = { module = "org.springframework.boot:spring-boot-dock
 springAi-starterMcpServerWebmvc = { module = "org.springframework.ai:spring-ai-starter-mcp-server-webmvc" }
 springModulith-starterCore = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 springModulith-starterTest = { module = "org.springframework.modulith:spring-modulith-starter-test" }
+springModulith-runtime = { module = "org.springframework.modulith:spring-modulith-runtime" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = "dataframe" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }

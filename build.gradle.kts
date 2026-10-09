@@ -26,12 +26,13 @@ dependencies {
     implementation(libs.springAi.starterMcpServerWebmvc)
     implementation(libs.kotlin.reflect)
     implementation(libs.springModulith.starterCore)
+    runtimeOnly(libs.springModulith.runtime)
     implementation(libs.kotlinx.dataframe)
     implementation(libs.kotlinx.datetime)
     implementation(libs.jimmer.springBootStarter)
     ksp(libs.jimmer.ksp)
     runtimeOnly(libs.postgresql)
-    
+
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
     testImplementation(libs.springModulith.starterTest)

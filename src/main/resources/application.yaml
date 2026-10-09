@@ -16,6 +16,10 @@ spring:
   main:
     keep-alive: true
 
+  modulith:
+    runtime:
+      verification-enabled: true
+
 jimmer:
   language: kotlin
   dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
