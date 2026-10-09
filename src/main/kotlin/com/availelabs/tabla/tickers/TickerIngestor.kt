@@ -4,6 +4,7 @@ import com.availelabs.tabla.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
+import org.jetbrains.kotlinx.dataframe.DataRow
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
@@ -12,29 +13,27 @@ import org.springframework.stereotype.Component
 import java.net.URI
 import kotlin.time.Clock
 
+// Do not further extend or alter ListingSchema.
+@DataSchema
 interface ListingSchema {
+    val `Security Name`: String
+    val `Test Issue`: Char
+    val `Round Lot Size`: Int
+    val ETF: Char
 
     @DataSchema
     interface NasdaqListing : ListingSchema {
         val Symbol: String
-        val `Security Name`: String
         val `Market Category`: Char
-        val `Test Issue`: Char
         val `Financial Status`: Char
-        val `Round Lot Size`: Int
-        val ETF: Char
         val NextShares: Char
     }
 
     @DataSchema
     interface OtherUsListing : ListingSchema {
         val `ACT Symbol`: String
-        val `Security Name`: String
         val Exchange: Char
         val `CQS Symbol`: String
-        val ETF: Char
-        val `Round Lot Size`: Int
-        val `Test Issue`: Char
         val `NASDAQ Symbol`: String
     }
 }
@@ -49,70 +48,23 @@ class TickerIngestor {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
-            val rawNasdaqListing = DataFrame.readCsv(
-                fileOrUrl = nasdaqListedSecuritiesSource.toString(),
-                delimiter = '|',
-                parserOptions = markEmptyFieldsAsNull,
-            )
-            val nasdaqListingsRetrievedAt = Clock.System.now()
-
-            val rawOtherUsListing = DataFrame.readCsv(
-                fileOrUrl = otherUsListedSecuritiesSource.toString(),
-                delimiter = '|',
-                parserOptions = markEmptyFieldsAsNull,
-            )
-            val otherUsListingsRetrievedAt = Clock.System.now()
-
-            val (nasdaqListing, nasdaqFileCreationTime) =
-                parseListingTable<ListingSchema.NasdaqListing>(rawNasdaqListing)
-            val (otherUsListing, otherUsFileCreationTime) =
-                parseListingTable<ListingSchema.OtherUsListing>(rawOtherUsListing)
+            val rawNasdaqListing = readListingTable(nasdaqListedSecuritiesSource, markEmptyFieldsAsNull)
+            val rawOtherUsListing = readListingTable(otherUsListedSecuritiesSource, markEmptyFieldsAsNull)
+            val nasdaqListing = parseListingTable<ListingSchema.NasdaqListing>(rawNasdaqListing)
+            val otherUsListing = parseListingTable<ListingSchema.OtherUsListing>(rawOtherUsListing)
 
             val etfs = mutableListOf<Etf>()
 
-            nasdaqListing
-                .filter { ETF == 'Y' }
-                .forEach { row ->
-                    etfs.add(
-                        Etf(
-                            instrumentId = InstrumentId.generate(),
-                            primaryListing = Listing.of(
-                                ticker = row.Symbol,
-                                name = row.`Security Name`,
-                                exchange = Exchange.NASDAQ
-                            ).sourcedBy(
-                                sourceInfo = SourceInfo(
-                                    uri = nasdaqListedSecuritiesSource,
-                                    retrievedAt = nasdaqListingsRetrievedAt,
-                                    createdAt = SourceTimestamp.DateTime(nasdaqFileCreationTime)
-                                )
-                            ),
-                            incomeHistory = HistoricalData(segments = emptyList())
-                        )
-                    )
-                }
-
-            otherUsListing
-                .filter { ETF == 'Y' }
-                .forEach { row ->
-                    etfs.add(
-                        Etf(
-                            instrumentId = InstrumentId.generate(),
-                            primaryListing = Listing.of(
-                                ticker = row.`ACT Symbol`,
-                                name = row.`Security Name`,
-                                exchange = exchangeOf(row.Exchange)
-                            ).sourcedBy(
-                                sourceInfo = SourceInfo(
-                                    uri = otherUsListedSecuritiesSource,
-                                    retrievedAt = otherUsListingsRetrievedAt,
-                                    createdAt = SourceTimestamp.DateTime(otherUsFileCreationTime)
-                                )
-                            ),
-                            incomeHistory = HistoricalData(segments = emptyList())
-                        )
-                    )
-                }
+            etfs.addEtfs(
+                listing = nasdaqListing,
+                ticker = { it.Symbol },
+                exchange = { Exchange.NASDAQ }
+            )
+            etfs.addEtfs(
+                listing = otherUsListing,
+                ticker = { it.`ACT Symbol` },
+                exchange = { exchangeOf(it.Exchange) }
+            )
 
             println(etfs.size)
             val etfTable = dataFrameOf(
@@ -127,17 +79,48 @@ class TickerIngestor {
         }
     }
 
-    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: DataFrame<*>): Pair<DataFrame<T>, LocalDateTime> {
-        // Whitelisted schemas; do not add a new schema unless it has a compatible structure, which is unlikely.
+    private fun readListingTable(source: URI, parserOptions: ParserOptions): Sourced<DataFrame<*>> {
+        val rawTable = DataFrame.readCsv(
+            fileOrUrl = source.toString(),
+            delimiter = '|',
+            parserOptions = parserOptions,
+        )
+        return rawTable.sourcedBy(SourceInfo(uri = source, retrievedAt = Clock.System.now(), createdAt = null))
+    }
+
+    private fun <T : ListingSchema> MutableList<Etf>.addEtfs(
+        listing: Sourced<DataFrame<T>>,
+        ticker: (DataRow<T>) -> String,
+        exchange: (DataRow<T>) -> Exchange
+    ) {
+        listing.value.filter { ETF == 'Y' }.forEach { row ->
+            add(
+                Etf(
+                    instrumentId = InstrumentId.generate(),
+                    primaryListing = Listing.of(
+                        ticker = ticker(row),
+                        name = row.`Security Name`,
+                        exchange = exchange(row)
+                    ).sourcedBy(listing.sourceInfo),
+                    incomeHistory = HistoricalData(segments = emptyList())
+                )
+            )
+        }
+    }
+
+    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: Sourced<DataFrame<*>>): Sourced<DataFrame<T>> {
+        // Whitelisted schemas; do not add new schemas.
         require(
             T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
         ) {
             "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
         }
 
-        val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable)
+        val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
 
-        return normalizedTable.cast<T>(verify = true) to fileCreationTime
+        return normalizedTable.cast<T>(verify = true).sourcedBy(
+            rawTable.sourceInfo.copy(createdAt = SourceTimestamp.DateTime(fileCreationTime))
+        )
     }
 
     private fun normalizeListingTable(rawTable: DataFrame<*>): Pair<DataFrame<*>, LocalDateTime> {
@@ -146,6 +129,7 @@ class TickerIngestor {
         require(testIssueColumn in rawTable.columnNames()) { "Missing required column: \"$testIssueColumn\"." }
 
         val prefix = "File Creation Time:"
+
         val rawFileCreationTime = rawTable
             .single { row -> row.values().first().toString().startsWith(prefix) }
             .values().first().toString().removePrefix(prefix).trim()
