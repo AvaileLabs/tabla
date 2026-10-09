@@ -7,6 +7,7 @@ import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 import java.net.URI
 import kotlin.time.Clock
 
@@ -37,6 +38,7 @@ interface ListingSchema {
     }
 }
 
+@Component
 class DataIngestor {
     private val logger = LoggerFactory.getLogger(DataIngestor::class.java)
     private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
@@ -179,8 +181,4 @@ class DataIngestor {
             'V' -> Exchange.IEX
             else -> error("Unsupported exchange code: $code")
         }
-}
-
-fun main() {
-    DataIngestor().ingestTickers()
 }
