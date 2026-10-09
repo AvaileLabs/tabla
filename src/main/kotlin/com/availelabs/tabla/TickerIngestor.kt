@@ -39,12 +39,12 @@ interface ListingSchema {
 }
 
 @Component
-class DataIngestor {
-    private val logger = LoggerFactory.getLogger(DataIngestor::class.java)
+class TickerIngestor {
+    private val logger = LoggerFactory.getLogger(TickerIngestor::class.java)
     private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
     private val otherUsListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt")
 
-    fun ingestTickers() {
+    fun ingest() {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
