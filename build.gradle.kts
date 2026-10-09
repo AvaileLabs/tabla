@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.dataframe)
     alias(libs.plugins.springBoot)
+    alias(libs.plugins.ksp)
 }
 
 group = "com.availelabs"
@@ -27,7 +28,10 @@ dependencies {
     implementation(libs.springModulith.starterCore)
     implementation(libs.kotlinx.dataframe)
     implementation(libs.kotlinx.datetime)
-
+    implementation(libs.jimmer.springBootStarter)
+    ksp(libs.jimmer.ksp)
+    runtimeOnly(libs.postgresql)
+    
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
     testImplementation(libs.springModulith.starterTest)

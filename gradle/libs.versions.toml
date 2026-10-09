@@ -5,6 +5,8 @@ springAi = "2.1.0-M1"
 springModulith = "2.2.0-M2"
 dataframe = "1.0.0-rc01"
 datetime = "0.8.0"
+jimmer = "0.12.4"
+ksp = "2.3.12"
 
 [libraries]
 springBoot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -23,9 +25,13 @@ kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
+jimmer-springBootStarter = { module = "org.babyfish.jimmer:jimmer-spring-boot-starter", version.ref = "jimmer" }
+jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
+postgresql = { module = "org.postgresql:postgresql" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 kotlin-dataframe = { id = "org.jetbrains.kotlin.plugin.dataframe", version.ref = "kotlin" }
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

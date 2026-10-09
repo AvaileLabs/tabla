@@ -15,3 +15,7 @@ spring:
 
   main:
     keep-alive: true
+
+jimmer:
+  language: kotlin
+  dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
