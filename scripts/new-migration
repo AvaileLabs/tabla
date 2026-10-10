@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Validate description
+if [[ $# -ne 1 ]] || [[ ! "$1" =~ ^[a-z][a-z0-9]*(_[a-z0-9]+)*$ ]]; then
+    echo "Usage: ./scripts/new-migration <snake_case_description>" >&2
+    exit 1
+fi
+
+description="$1"
+
+# Resolve project root
+project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+
+# Generate UTC timestamp and migration path
+timestamp="$(date -u +%Y%m%d%H%M%S)"
+migration_root="$project_root/src/main/resources/db/migration"
+directory="$migration_root/${timestamp:0:4}/${timestamp:4:2}"
+filename="V${timestamp}__${description}.sql"
+filepath="$directory/$filename"
+
+mkdir -p "$directory"
+
+# Prevent duplicate Flyway versions
+if [[ -n "$(find "$migration_root" -type f -name "V${timestamp}__*.sql" -print -quit)" ]]; then
+    echo "Migration version $timestamp already exists. Try again in a second." >&2
+    exit 1
+fi
+
+# Create an empty SQL file without overwriting existing files
+if ! (set -C; : > "$filepath"); then
+    echo "Could not create migration: $filepath" >&2
+    exit 1
+fi
+
+printf 'Created: %s\n' "${filepath#"$project_root"/}"
