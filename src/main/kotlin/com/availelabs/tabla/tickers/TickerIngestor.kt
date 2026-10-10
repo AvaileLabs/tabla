@@ -45,33 +45,14 @@ class TickerIngestor {
     private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
     private val otherUsListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt")
 
-    private data class RetrievedListingTable(
-        val value: DataFrame<*>,
-        val uri: URI,
-        val retrievedAt: Instant
-    )
-
-    private class ParsedListingTable<T : ListingSchema>(
-        val value: DataFrame<T>,
-        uri: URI,
-        retrievedAt: Instant,
-        fileCreationTime: LocalDateTime
-    ) {
-        val sourceInfo = SourceInfo(
-            uri = uri,
-            retrievedAt = retrievedAt,
-            createdAt = SourceTimestamp.DateTime(fileCreationTime)
-        )
-    }
-
     fun ingest() {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
             val rawNasdaqListing = readListingTable(nasdaqListedSecuritiesSource, markEmptyFieldsAsNull)
             val rawOtherUsListing = readListingTable(otherUsListedSecuritiesSource, markEmptyFieldsAsNull)
-            val nasdaqListing = parseListingTable<ListingSchema.NasdaqListing>(rawNasdaqListing)
-            val otherUsListing = parseListingTable<ListingSchema.OtherUsListing>(rawOtherUsListing)
+            val nasdaqListing = ParsedListingTable.parse<ListingSchema.NasdaqListing>(rawNasdaqListing)
+            val otherUsListing = ParsedListingTable.parse<ListingSchema.OtherUsListing>(rawOtherUsListing)
 
             val etfs = nasdaqListing.toEtfs(
                 ticker = { it.Symbol },
@@ -91,6 +72,77 @@ class TickerIngestor {
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
             throw e
+        }
+    }
+
+    private data class RetrievedListingTable(
+        val value: DataFrame<*>,
+        val uri: URI,
+        val retrievedAt: Instant
+    )
+
+    private class ParsedListingTable<T : ListingSchema> private constructor(
+        val value: DataFrame<T>,
+        uri: URI,
+        retrievedAt: Instant,
+        fileCreationTime: LocalDateTime
+    ) {
+        val sourceInfo = SourceInfo(
+            uri = uri,
+            retrievedAt = retrievedAt,
+            createdAt = SourceTimestamp.DateTime(fileCreationTime)
+        )
+
+        companion object {
+            inline fun <reified T : ListingSchema> parse(rawTable: RetrievedListingTable): ParsedListingTable<T> {
+                // Whitelisted schemas; do not add new schemas.
+                require(
+                    T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
+                ) {
+                    "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
+                }
+
+                val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
+
+                return ParsedListingTable(
+                    value = normalizedTable.cast<T>(verify = true),
+                    uri = rawTable.uri,
+                    retrievedAt = rawTable.retrievedAt,
+                    fileCreationTime = fileCreationTime
+                )
+            }
+
+            private fun normalizeListingTable(rawTable: DataFrame<*>): Pair<DataFrame<*>, LocalDateTime> {
+                val testIssueColumn = "Test Issue"
+
+                require(testIssueColumn in rawTable.columnNames()) { "Missing required column: \"$testIssueColumn\"." }
+
+                val prefix = "File Creation Time:"
+
+                val rawFileCreationTime = rawTable
+                    .single { row -> row.values().first().toString().startsWith(prefix) }
+                    .values().first().toString().removePrefix(prefix).trim()
+                val fileCreationTime = parseCreationTime(rawFileCreationTime)
+
+                val normalizedTable = rawTable
+                    .drop { row -> row.values().first().toString().startsWith(prefix) }
+                    .drop { row -> row[testIssueColumn].toString() == "Y" }
+
+                return normalizedTable to fileCreationTime
+            }
+
+            private fun parseCreationTime(creationTime: String): LocalDateTime {
+                val format = LocalDateTime.Format {
+                    monthNumber()
+                    day()
+                    year()
+                    hour()
+                    char(':')
+                    minute()
+                }
+
+                return format.parse(creationTime)
+            }
         }
     }
 
@@ -122,56 +174,6 @@ class TickerIngestor {
                 incomeHistory = HistoricalData(segments = emptyList())
             )
         }
-
-    private inline fun <reified T : ListingSchema> parseListingTable(rawTable: RetrievedListingTable): ParsedListingTable<T> {
-        // Whitelisted schemas; do not add new schemas.
-        require(
-            T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
-        ) {
-            "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
-        }
-
-        val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
-
-        return ParsedListingTable(
-            value = normalizedTable.cast<T>(verify = true),
-            uri = rawTable.uri,
-            retrievedAt = rawTable.retrievedAt,
-            fileCreationTime = fileCreationTime
-        )
-    }
-
-    private fun normalizeListingTable(rawTable: DataFrame<*>): Pair<DataFrame<*>, LocalDateTime> {
-        val testIssueColumn = "Test Issue"
-
-        require(testIssueColumn in rawTable.columnNames()) { "Missing required column: \"$testIssueColumn\"." }
-
-        val prefix = "File Creation Time:"
-
-        val rawFileCreationTime = rawTable
-            .single { row -> row.values().first().toString().startsWith(prefix) }
-            .values().first().toString().removePrefix(prefix).trim()
-        val fileCreationTime = parseCreationTime(rawFileCreationTime)
-
-        val normalizedTable = rawTable
-            .drop { row -> row.values().first().toString().startsWith(prefix) }
-            .drop { row -> row[testIssueColumn].toString() == "Y" }
-
-        return normalizedTable to fileCreationTime
-    }
-
-    private fun parseCreationTime(creationTime: String): LocalDateTime {
-        val format = LocalDateTime.Format {
-            monthNumber()
-            day()
-            year()
-            hour()
-            char(':')
-            minute()
-        }
-
-        return format.parse(creationTime)
-    }
 
     private fun exchangeOf(code: Char): Exchange =
         when (code) {
