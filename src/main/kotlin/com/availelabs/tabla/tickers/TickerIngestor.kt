@@ -4,7 +4,6 @@ import com.availelabs.tabla.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.DataRow
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
@@ -14,53 +13,35 @@ import java.net.URI
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-// Do not further extend or alter ListingSchema.
 @DataSchema
-interface ListingSchema {
+interface NasdaqTradedSecurity {
+    // The footer shares this column, so CSV parsing infers String.
+    val `Nasdaq Traded`: String
+    val Symbol: String
     val `Security Name`: String
-    val `Test Issue`: Char
-    val `Round Lot Size`: Int
+    val `Listing Exchange`: Char
+    val `Market Category`: Char?
     val ETF: Char
-
-    @DataSchema
-    interface NasdaqListing : ListingSchema {
-        val Symbol: String
-        val `Market Category`: Char
-        val `Financial Status`: Char
-        val NextShares: Char
-    }
-
-    @DataSchema
-    interface OtherUsListing : ListingSchema {
-        val `ACT Symbol`: String
-        val Exchange: Char
-        val `CQS Symbol`: String
-        val `NASDAQ Symbol`: String
-    }
+    val `Round Lot Size`: Int
+    val `Test Issue`: Char
+    val `Financial Status`: Char?
+    val `CQS Symbol`: String?
+    val `NASDAQ Symbol`: String
+    val NextShares: Char
 }
 
 @Component
 class TickerIngestor {
     private val logger = LoggerFactory.getLogger(TickerIngestor::class.java)
-    private val nasdaqListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt")
-    private val otherUsListedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt")
+    private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
     fun ingest() {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
-            val rawNasdaqListing = readListingTable(nasdaqListedSecuritiesSource, markEmptyFieldsAsNull)
-            val rawOtherUsListing = readListingTable(otherUsListedSecuritiesSource, markEmptyFieldsAsNull)
-            val nasdaqListing = ParsedListingTable.parse<ListingSchema.NasdaqListing>(rawNasdaqListing)
-            val otherUsListing = ParsedListingTable.parse<ListingSchema.OtherUsListing>(rawOtherUsListing)
-
-            val etfs = nasdaqListing.toEtfs(
-                ticker = { it.Symbol },
-                exchange = { Exchange.NASDAQ }
-            ) + otherUsListing.toEtfs(
-                ticker = { it.`ACT Symbol` },
-                exchange = { exchangeOf(it.Exchange) }
-            )
+            val rawNasdaqListing = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
+            val nasdaqListing = ParsedListingTable.parse(rawNasdaqListing)
+            val etfs = nasdaqListing.toEtfs()
 
             println(etfs.size)
             val etfTable = dataFrameOf(
@@ -76,13 +57,13 @@ class TickerIngestor {
     }
 
     private data class RetrievedListingTable(
-        val value: DataFrame<*>,
+        val value: DataFrame<NasdaqTradedSecurity>,
         val uri: URI,
         val retrievedAt: Instant
     )
 
-    private class ParsedListingTable<T : ListingSchema> private constructor(
-        val value: DataFrame<T>,
+    private class ParsedListingTable private constructor(
+        val value: DataFrame<NasdaqTradedSecurity>,
         uri: URI,
         retrievedAt: Instant,
         fileCreationTime: LocalDateTime
@@ -94,39 +75,30 @@ class TickerIngestor {
         )
 
         companion object {
-            inline fun <reified T : ListingSchema> parse(rawTable: RetrievedListingTable): ParsedListingTable<T> {
-                // Whitelisted schemas; do not add new schemas.
-                require(
-                    T::class == ListingSchema.NasdaqListing::class || T::class == ListingSchema.OtherUsListing::class
-                ) {
-                    "Unsupported schema: ${T::class}. Supported schemas are NasdaqListing and OtherUsListing."
-                }
-
+            fun parse(rawTable: RetrievedListingTable): ParsedListingTable {
                 val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
 
                 return ParsedListingTable(
-                    value = normalizedTable.cast<T>(verify = true),
+                    value = normalizedTable.cast<NasdaqTradedSecurity>(verify = true),
                     uri = rawTable.uri,
                     retrievedAt = rawTable.retrievedAt,
                     fileCreationTime = fileCreationTime
                 )
             }
 
-            private fun normalizeListingTable(rawTable: DataFrame<*>): Pair<DataFrame<*>, LocalDateTime> {
-                val testIssueColumn = "Test Issue"
-
-                require(testIssueColumn in rawTable.columnNames()) { "Missing required column: \"$testIssueColumn\"." }
-
+            private fun normalizeListingTable(
+                rawTable: DataFrame<NasdaqTradedSecurity>
+            ): Pair<DataFrame<NasdaqTradedSecurity>, LocalDateTime> {
                 val prefix = "File Creation Time:"
 
                 val rawFileCreationTime = rawTable
-                    .single { row -> row.values().first().toString().startsWith(prefix) }
-                    .values().first().toString().removePrefix(prefix).trim()
+                    .single { `Nasdaq Traded`.startsWith(prefix) }
+                    .`Nasdaq Traded`.removePrefix(prefix).trim()
                 val fileCreationTime = parseCreationTime(rawFileCreationTime)
 
                 val normalizedTable = rawTable
-                    .drop { row -> row.values().first().toString().startsWith(prefix) }
-                    .drop { row -> row[testIssueColumn].toString() == "Y" }
+                    .drop { `Nasdaq Traded`.startsWith(prefix) }
+                    .drop { `Test Issue` == 'Y' }
 
                 return normalizedTable to fileCreationTime
             }
@@ -153,23 +125,20 @@ class TickerIngestor {
             parserOptions = parserOptions,
         )
         return RetrievedListingTable(
-            value = rawTable,
+            value = rawTable.cast<NasdaqTradedSecurity>(verify = false),
             uri = source,
             retrievedAt = Clock.System.now()
         )
     }
 
-    private fun <T : ListingSchema> ParsedListingTable<T>.toEtfs(
-        ticker: (DataRow<T>) -> String,
-        exchange: (DataRow<T>) -> Exchange
-    ): List<Etf> =
+    private fun ParsedListingTable.toEtfs(): List<Etf> =
         value.filter { ETF == 'Y' }.map { row ->
             Etf(
                 instrumentId = InstrumentId.generate(),
                 primaryListing = Listing.of(
-                    ticker = ticker(row),
+                    ticker = row.`NASDAQ Symbol`,
                     name = row.`Security Name`,
-                    exchange = exchange(row)
+                    exchange = exchangeOf(row.`Listing Exchange`)
                 ).sourcedBy(sourceInfo),
                 incomeHistory = HistoricalData(segments = emptyList())
             )
@@ -182,6 +151,7 @@ class TickerIngestor {
             'M' -> Exchange.NYSE_TEXAS
             'N' -> Exchange.NYSE
             'P' -> Exchange.NYSE_ARCA
+            'Q' -> Exchange.NASDAQ
             'Z' -> Exchange.CBOE_BZX
             'V' -> Exchange.IEX
             else -> error("Unsupported exchange code: $code")
