@@ -76,7 +76,7 @@ class NasdaqSecurityDirectoryIngestor {
 
         companion object {
             fun parse(rawTable: RetrievedListingTable): ParsedListingTable {
-                val (normalizedTable, fileCreationTime) = normalizeListingTable(rawTable.value)
+                val [normalizedTable, fileCreationTime] = normalizeListingTable(rawTable.value)
 
                 return ParsedListingTable(
                     value = normalizedTable.cast<NasdaqTradedSecurity>(verify = true),
