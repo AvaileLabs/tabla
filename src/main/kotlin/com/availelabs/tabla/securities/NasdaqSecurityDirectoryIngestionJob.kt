@@ -1,4 +1,4 @@
-package com.availelabs.tabla.tickers
+package com.availelabs.tabla.securities
 
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -6,15 +6,15 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class TickerIngestionJob(
-    private val tickerIngestor: TickerIngestor
+class NasdaqSecurityDirectoryIngestionJob(
+    private val nasdaqSecurityDirectoryIngestor: NasdaqSecurityDirectoryIngestor
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        tickerIngestor.ingest()
+        nasdaqSecurityDirectoryIngestor.ingest()
     }
 
     @Scheduled(cron = "0 0 3 * * *", zone = "America/New_York")
     fun runDaily() {
-        tickerIngestor.ingest()
+        nasdaqSecurityDirectoryIngestor.ingest()
     }
 }

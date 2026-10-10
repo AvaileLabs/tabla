@@ -1,4 +1,4 @@
-package com.availelabs.tabla.tickers
+package com.availelabs.tabla.securities
 
 import com.availelabs.tabla.*
 import kotlinx.datetime.LocalDateTime
@@ -31,8 +31,8 @@ interface NasdaqTradedSecurity {
 }
 
 @Component
-class TickerIngestor {
-    private val logger = LoggerFactory.getLogger(TickerIngestor::class.java)
+class NasdaqSecurityDirectoryIngestor {
+    private val logger = LoggerFactory.getLogger(NasdaqSecurityDirectoryIngestor::class.java)
     private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
     fun ingest() {
