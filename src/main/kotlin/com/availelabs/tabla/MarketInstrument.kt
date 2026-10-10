@@ -18,22 +18,33 @@ value class InstrumentId(val value: Uuid) {
     }
 }
 
+data class SecuritySymbols(
+    val symbol: String,
+    val nasdaqSymbol: String,
+    val cqsSymbol: String?
+)
+
 @ConsistentCopyVisibility
 data class Listing private constructor(
-    val ticker: String,
+    val symbols: SecuritySymbols,
     val name: String,
     val exchange: Exchange
 ) {
     companion object {
-        fun of(ticker: String, name: String, exchange: Exchange): Listing {
-            val normalizedTicker = ticker.trim().uppercase()
-            val normalizedName = name.trim()
+        fun of(symbols: SecuritySymbols, name: String, exchange: Exchange): Listing {
+            val normalizedSymbols = symbols.copy(
+                symbol = symbols.symbol.trim().uppercase(),
+                nasdaqSymbol = symbols.nasdaqSymbol.trim().uppercase(),
+                cqsSymbol = symbols.cqsSymbol?.trim()?.takeIf { it.isNotEmpty() }
+            )
+            require(normalizedSymbols.symbol.isNotEmpty()) { "Symbol cannot be empty" }
+            require(normalizedSymbols.nasdaqSymbol.isNotEmpty()) { "NASDAQ symbol cannot be empty" }
 
-            require(normalizedTicker.isNotEmpty()) { "Ticker cannot be empty" }
+            val normalizedName = name.trim()
             require(normalizedName.isNotEmpty()) { "Name cannot be empty" }
 
             return Listing(
-                ticker = normalizedTicker,
+                symbols = normalizedSymbols,
                 name = normalizedName,
                 exchange = exchange
             )

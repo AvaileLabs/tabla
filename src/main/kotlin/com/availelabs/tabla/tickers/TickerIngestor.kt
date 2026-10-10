@@ -45,7 +45,7 @@ class TickerIngestor {
 
             println(etfs.size)
             val etfTable = dataFrameOf(
-                "Ticker" to etfs.map { it.primaryListing.value.ticker },
+                "Ticker" to etfs.map { it.primaryListing.value.symbols },
                 "Name" to etfs.map { it.primaryListing.value.name },
                 "Exchange" to etfs.map { it.primaryListing.value.exchange.name },
             )
@@ -136,7 +136,11 @@ class TickerIngestor {
             Etf(
                 instrumentId = InstrumentId.generate(),
                 primaryListing = Listing.of(
-                    ticker = row.`NASDAQ Symbol`,
+                    symbols = SecuritySymbols(
+                        symbol = row.Symbol,
+                        nasdaqSymbol = row.`NASDAQ Symbol`,
+                        cqsSymbol = row.`CQS Symbol`
+                    ),
                     name = row.`Security Name`,
                     exchange = exchangeOf(row.`Listing Exchange`)
                 ).sourcedBy(sourceInfo),
