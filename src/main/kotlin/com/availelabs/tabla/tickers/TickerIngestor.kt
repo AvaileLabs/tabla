@@ -73,15 +73,10 @@ class TickerIngestor {
             val nasdaqListing = parseListingTable<ListingSchema.NasdaqListing>(rawNasdaqListing)
             val otherUsListing = parseListingTable<ListingSchema.OtherUsListing>(rawOtherUsListing)
 
-            val etfs = mutableListOf<Etf>()
-
-            etfs.addEtfs(
-                listing = nasdaqListing,
+            val etfs = nasdaqListing.toEtfs(
                 ticker = { it.Symbol },
                 exchange = { Exchange.NASDAQ }
-            )
-            etfs.addEtfs(
-                listing = otherUsListing,
+            ) + otherUsListing.toEtfs(
                 ticker = { it.`ACT Symbol` },
                 exchange = { exchangeOf(it.Exchange) }
             )
@@ -112,25 +107,21 @@ class TickerIngestor {
         )
     }
 
-    private fun <T : ListingSchema> MutableList<Etf>.addEtfs(
-        listing: ParsedListingTable<T>,
+    private fun <T : ListingSchema> ParsedListingTable<T>.toEtfs(
         ticker: (DataRow<T>) -> String,
         exchange: (DataRow<T>) -> Exchange
-    ) {
-        listing.value.filter { ETF == 'Y' }.forEach { row ->
-            add(
-                Etf(
-                    instrumentId = InstrumentId.generate(),
-                    primaryListing = Listing.of(
-                        ticker = ticker(row),
-                        name = row.`Security Name`,
-                        exchange = exchange(row)
-                    ).sourcedBy(listing.sourceInfo),
-                    incomeHistory = HistoricalData(segments = emptyList())
-                )
+    ): List<Etf> =
+        value.filter { ETF == 'Y' }.map { row ->
+            Etf(
+                instrumentId = InstrumentId.generate(),
+                primaryListing = Listing.of(
+                    ticker = ticker(row),
+                    name = row.`Security Name`,
+                    exchange = exchange(row)
+                ).sourcedBy(sourceInfo),
+                incomeHistory = HistoricalData(segments = emptyList())
             )
         }
-    }
 
     private inline fun <reified T : ListingSchema> parseListingTable(rawTable: RetrievedListingTable): ParsedListingTable<T> {
         // Whitelisted schemas; do not add new schemas.
