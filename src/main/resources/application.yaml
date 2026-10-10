@@ -23,3 +23,4 @@ spring:
 jimmer:
   language: kotlin
   dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
+  database-validation-mode: error

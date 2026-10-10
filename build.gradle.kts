@@ -40,6 +40,8 @@ dependencies {
     testImplementation(libs.springModulith.starterTest)
     developmentOnly(libs.springBoot.dockerCompose)
     testRuntimeOnly(libs.junit.platformLauncher)
+    testImplementation(libs.springBoot.testcontainers)
+    testImplementation(libs.testcontainers.postgresql)
 }
 
 kotlin {

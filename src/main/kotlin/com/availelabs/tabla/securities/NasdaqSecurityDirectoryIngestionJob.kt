@@ -10,7 +10,7 @@ class NasdaqSecurityDirectoryIngestionJob(
     private val nasdaqSecurityDirectoryIngestor: NasdaqSecurityDirectoryIngestor
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        nasdaqSecurityDirectoryIngestor.ingest()
+//        nasdaqSecurityDirectoryIngestor.ingest()
     }
 
     @Scheduled(cron = "0 0 3 * * *", zone = "America/New_York")

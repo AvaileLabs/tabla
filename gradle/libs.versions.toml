@@ -31,6 +31,8 @@ jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer"
 postgresql = { module = "org.postgresql:postgresql" }
 springBoot-starterFlyway = { module = "org.springframework.boot:spring-boot-starter-flyway" }
 flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
+springBoot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
+testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
