@@ -32,6 +32,8 @@ dependencies {
     implementation(libs.jimmer.springBootStarter)
     ksp(libs.jimmer.ksp)
     runtimeOnly(libs.postgresql)
+    implementation(libs.springBoot.starterFlyway)
+    runtimeOnly(libs.flyway.postgresql)
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)

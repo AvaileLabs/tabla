@@ -29,6 +29,8 @@ junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher"
 jimmer-springBootStarter = { module = "org.babyfish.jimmer:jimmer-spring-boot-starter", version.ref = "jimmer" }
 jimmer-ksp = { module = "org.babyfish.jimmer:jimmer-ksp", version.ref = "jimmer" }
 postgresql = { module = "org.postgresql:postgresql" }
+springBoot-starterFlyway = { module = "org.springframework.boot:spring-boot-starter-flyway" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
