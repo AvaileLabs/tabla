@@ -35,21 +35,14 @@ class NasdaqSecurityDirectoryIngestor {
     private val logger = LoggerFactory.getLogger(NasdaqSecurityDirectoryIngestor::class.java)
     private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
-    fun ingest() {
+    fun ingest(): List<Etf> {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
             val rawNasdaqListing = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
             val nasdaqListing = ParsedListingTable.parse(rawNasdaqListing)
-            val etfs = nasdaqListing.toEtfs()
-
-            println(etfs.size)
-            val etfTable = dataFrameOf(
-                "Ticker" to etfs.map { it.primaryListing.value.symbols },
-                "Name" to etfs.map { it.primaryListing.value.name },
-                "Exchange" to etfs.map { it.primaryListing.value.exchange.name },
-            )
-            etfTable.print(rowsLimit = null, valueLimit = null)
+            
+            return nasdaqListing.toEtfs()
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
             throw e
@@ -135,7 +128,7 @@ class NasdaqSecurityDirectoryIngestor {
         value.filter { ETF == 'Y' }.map { row ->
             Etf(
                 instrumentId = InstrumentId.generate(),
-                primaryListing = Listing.of(
+                listing = Listing.of(
                     symbols = SecuritySymbols(
                         symbol = row.Symbol,
                         nasdaqSymbol = row.`NASDAQ Symbol`,

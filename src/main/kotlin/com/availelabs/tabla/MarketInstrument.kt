@@ -5,7 +5,7 @@ import kotlin.uuid.Uuid
 
 sealed interface MarketInstrument {
     val instrumentId: InstrumentId
-    val primaryListing: Sourced<Listing>
+    val listing: Sourced<Listing>
     val incomeHistory: HistoricalData<IncomePayment>
 }
 
@@ -54,13 +54,13 @@ data class Listing private constructor(
 
 data class Stock(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
-    override val primaryListing: Sourced<Listing>,
+    override val listing: Sourced<Listing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
 
 data class Etf(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
-    override val primaryListing: Sourced<Listing>,
+    override val listing: Sourced<Listing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
 
