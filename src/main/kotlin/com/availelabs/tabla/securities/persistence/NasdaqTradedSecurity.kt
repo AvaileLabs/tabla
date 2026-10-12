@@ -4,9 +4,21 @@ import org.babyfish.jimmer.sql.Embeddable
 import org.jetbrains.kotlinx.dataframe.annotations.ColumnName
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 
+/* The reason we don't include testIssue in NasdaqTradedSecurity is because @Embeddable is used to tell
+Jimmer ORM to map properties to database columns. The testIssue is needed for dataframe filtering in the
+NasdaqSecurityDirectoryIngestor, but it's not persisted in the database.
+ */
+@DataSchema
+interface NasdaqTestIssueSchema {
+    
+    @ColumnName("Test Issue")
+    val testIssue: Char
+}
+
 @DataSchema
 @Embeddable
 interface NasdaqTradedSecurity {
+
     @ColumnName("Nasdaq Traded")
     val nasdaqTraded: String
 
@@ -27,9 +39,6 @@ interface NasdaqTradedSecurity {
 
     @ColumnName("Round Lot Size")
     val roundLotSize: Int
-
-    @ColumnName("Test Issue")
-    val testIssue: Char
 
     @ColumnName("Financial Status")
     val financialStatus: Char?

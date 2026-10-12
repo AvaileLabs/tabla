@@ -8,7 +8,7 @@ import org.babyfish.jimmer.sql.Table
 import kotlin.time.Instant
 
 @Entity
-@Table(name = "nasdaq_directory")
+@Table(name = "nasdaq_traded_security_directory")
 interface NasdaqDirectoryEntity {
 
     @Id

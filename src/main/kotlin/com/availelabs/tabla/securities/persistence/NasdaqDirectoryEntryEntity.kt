@@ -4,7 +4,7 @@ import org.babyfish.jimmer.sql.*
 import kotlin.uuid.Uuid
 
 @Entity
-@Table(name = "nasdaq_directory_entry")
+@Table(name = "nasdaq_traded_security_directory_entry")
 interface NasdaqDirectoryEntryEntity {
 
     @Id

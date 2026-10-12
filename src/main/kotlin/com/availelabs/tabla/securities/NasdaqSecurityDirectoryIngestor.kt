@@ -80,7 +80,10 @@ class NasdaqSecurityDirectoryIngestor {
 
                 val normalizedTable = rawTable
                     .drop { nasdaqTraded.startsWith(prefix) }
-                    .drop { testIssue == 'Y' }
+                    .cast<NasdaqTestIssueSchema>(verify = true)
+                    .drop { testIssue != 'N' }
+                    .remove { testIssue }
+                    .cast<NasdaqTradedSecurity>(verify = true)
 
                 return normalizedTable to fileCreationTime
             }
@@ -127,7 +130,6 @@ class NasdaqSecurityDirectoryIngestor {
                     marketCategory = row.marketCategory,
                     etf = row.etf,
                     roundLotSize = row.roundLotSize,
-                    testIssue = row.testIssue,
                     financialStatus = row.financialStatus,
                     cqsSymbol = row.cqsSymbol,
                     nasdaqSymbol = row.nasdaqSymbol,
