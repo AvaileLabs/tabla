@@ -1,0 +1,6 @@
+export com.availelabs.tabla.securities.persistence.NasdaqDirectoryEntryEntity
+
+input NasdaqDirectoryEntryInput {
+    #allScalars(this)
+    id(directory) as directoryId
+}

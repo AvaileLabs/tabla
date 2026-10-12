@@ -15,6 +15,7 @@ import java.time.ZoneId
 class NasdaqSecurityDirectoryIngestionJob(
     private val nasdaqSecurityDirectoryIngestor: NasdaqSecurityDirectoryIngestor,
     private val repository: SecurityListingRepository,
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection") // file report later
     private val taskScheduler: TaskScheduler
 ) : ApplicationRunner {
 
@@ -37,6 +38,6 @@ class NasdaqSecurityDirectoryIngestionJob(
     }
 
     private fun ingest() {
-        repository.insertAll(nasdaqSecurityDirectoryIngestor.ingest())
+        repository.replaceNasdaqDirectory(nasdaqSecurityDirectoryIngestor.ingest())
     }
 }

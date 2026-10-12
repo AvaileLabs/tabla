@@ -50,6 +50,11 @@ kotlin {
     }
 }
 
+tasks.matching { it.name == "kspKotlin" }.configureEach {
+    inputs.files(fileTree("src/main/dto") { include("**/*.dto") })
+        .withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }

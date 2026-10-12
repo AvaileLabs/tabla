@@ -1,10 +1,13 @@
 package com.availelabs.tabla.securities
 
-import com.availelabs.tabla.*
+import com.availelabs.tabla.Exchange
+import com.availelabs.tabla.SourceInfo
+import com.availelabs.tabla.SourceTimestamp
+import com.availelabs.tabla.securities.persistence.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
+import org.babyfish.jimmer.kt.new
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
@@ -12,37 +15,48 @@ import org.springframework.stereotype.Component
 import java.net.URI
 import kotlin.time.Clock
 import kotlin.time.Instant
-
-@DataSchema
-interface NasdaqTradedSecurity {
-    // The footer shares this column, so CSV parsing infers String.
-    val `Nasdaq Traded`: String
-    val Symbol: String
-    val `Security Name`: String
-    val `Listing Exchange`: Char
-    val `Market Category`: Char?
-    val ETF: Char
-    val `Round Lot Size`: Int
-    val `Test Issue`: Char
-    val `Financial Status`: Char?
-    val `CQS Symbol`: String?
-    val `NASDAQ Symbol`: String
-    val NextShares: Char
-}
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Component
 class NasdaqSecurityDirectoryIngestor {
     private val logger = LoggerFactory.getLogger(NasdaqSecurityDirectoryIngestor::class.java)
     private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
-    fun ingest(): List<Etf> {
+    @OptIn(ExperimentalUuidApi::class)
+    fun ingest(): NasdaqDirectoryEntity {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
-            val rawNasdaqListing = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
-            val nasdaqListing = ParsedListingTable.parse(rawNasdaqListing)
-            
-            return nasdaqListing.toEtfs()
+            val rawTable = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
+            val parsedTable = ParsedListingTable.parse(rawTable)
+
+            val entries = parsedTable.value.map { row ->
+                new(NasdaqDirectoryEntryEntity::class).by {
+                    id = Uuid.generateV7()
+                    security {
+                        nasdaqTraded = row.nasdaqTraded
+                        symbol = row.symbol
+                        securityName = row.securityName
+                        listingExchange = row.listingExchange
+                        marketCategory = row.marketCategory
+                        etf = row.etf
+                        roundLotSize = row.roundLotSize
+                        testIssue = row.testIssue
+                        financialStatus = row.financialStatus
+                        cqsSymbol = row.cqsSymbol
+                        nasdaqSymbol = row.nasdaqSymbol
+                        nextShares = row.nextShares
+                    }
+                }
+            }
+
+            return new(NasdaqDirectoryEntity::class).by {
+                sourceUri = parsedTable.sourceInfo.uri.toString()
+                retrievedAt = parsedTable.sourceInfo.retrievedAt
+                fileCreatedAt = parsedTable.fileCreationTime
+                this.entries = entries
+            }
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
             throw e
@@ -59,7 +73,7 @@ class NasdaqSecurityDirectoryIngestor {
         val value: DataFrame<NasdaqTradedSecurity>,
         uri: URI,
         retrievedAt: Instant,
-        fileCreationTime: LocalDateTime
+        val fileCreationTime: LocalDateTime
     ) {
         val sourceInfo = SourceInfo(
             uri = uri,
@@ -85,13 +99,13 @@ class NasdaqSecurityDirectoryIngestor {
                 val prefix = "File Creation Time:"
 
                 val rawFileCreationTime = rawTable
-                    .single { `Nasdaq Traded`.startsWith(prefix) }
-                    .`Nasdaq Traded`.removePrefix(prefix).trim()
+                    .single { nasdaqTraded.startsWith(prefix) }
+                    .nasdaqTraded.removePrefix(prefix).trim()
                 val fileCreationTime = parseCreationTime(rawFileCreationTime)
 
                 val normalizedTable = rawTable
-                    .drop { `Nasdaq Traded`.startsWith(prefix) }
-                    .drop { `Test Issue` == 'Y' }
+                    .drop { nasdaqTraded.startsWith(prefix) }
+                    .drop { testIssue == 'Y' }
 
                 return normalizedTable to fileCreationTime
             }
@@ -113,7 +127,7 @@ class NasdaqSecurityDirectoryIngestor {
 
     private fun readListingTable(source: URI, parserOptions: ParserOptions): RetrievedListingTable {
         val rawTable = DataFrame.readCsv(
-            fileOrUrl = source.toString(),
+            url = source.toURL(),
             delimiter = '|',
             parserOptions = parserOptions,
         )
@@ -123,23 +137,6 @@ class NasdaqSecurityDirectoryIngestor {
             retrievedAt = Clock.System.now()
         )
     }
-
-    private fun ParsedListingTable.toEtfs(): List<Etf> =
-        value.filter { ETF == 'Y' }.map { row ->
-            Etf(
-                instrumentId = InstrumentId.generate(),
-                listing = Listing.of(
-                    symbols = SecuritySymbols(
-                        symbol = row.Symbol,
-                        nasdaqSymbol = row.`NASDAQ Symbol`,
-                        cqsSymbol = row.`CQS Symbol`
-                    ),
-                    name = row.`Security Name`,
-                    exchange = exchangeOf(row.`Listing Exchange`)
-                ).sourcedBy(sourceInfo),
-                incomeHistory = HistoricalData(segments = emptyList())
-            )
-        }
 
     private fun exchangeOf(code: Char): Exchange =
         when (code) {

@@ -1,5 +1,0 @@
-export com.availelabs.tabla.securities.persistence.SecurityListingEntity
-
-input SecurityListingInput {
-    #allScalars(this)
-}
