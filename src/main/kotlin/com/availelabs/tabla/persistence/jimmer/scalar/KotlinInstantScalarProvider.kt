@@ -1,4 +1,4 @@
-package com.availelabs.tabla.securities.persistence
+package com.availelabs.tabla.persistence.jimmer.scalar
 
 import org.babyfish.jimmer.sql.runtime.ScalarProvider
 import org.springframework.stereotype.Component
