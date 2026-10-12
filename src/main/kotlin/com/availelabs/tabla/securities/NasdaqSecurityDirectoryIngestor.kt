@@ -4,9 +4,10 @@ import com.availelabs.tabla.Exchange
 import com.availelabs.tabla.SourceInfo
 import com.availelabs.tabla.SourceTimestamp
 import com.availelabs.tabla.securities.persistence.*
+import com.availelabs.tabla.securities.persistence.dto.NasdaqDirectoryEntryInput
+import com.availelabs.tabla.securities.persistence.dto.NasdaqDirectoryInput
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
-import org.babyfish.jimmer.kt.new
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
@@ -23,7 +24,6 @@ class NasdaqSecurityDirectoryIngestor {
     private val logger = LoggerFactory.getLogger(NasdaqSecurityDirectoryIngestor::class.java)
     private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
-    @OptIn(ExperimentalUuidApi::class)
     fun ingest(): NasdaqDirectoryEntity {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
@@ -31,32 +31,7 @@ class NasdaqSecurityDirectoryIngestor {
             val rawTable = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
             val parsedTable = ParsedListingTable.parse(rawTable)
 
-            val entries = parsedTable.value.map { row ->
-                new(NasdaqDirectoryEntryEntity::class).by {
-                    id = Uuid.generateV7()
-                    security {
-                        nasdaqTraded = row.nasdaqTraded
-                        symbol = row.symbol
-                        securityName = row.securityName
-                        listingExchange = row.listingExchange
-                        marketCategory = row.marketCategory
-                        etf = row.etf
-                        roundLotSize = row.roundLotSize
-                        testIssue = row.testIssue
-                        financialStatus = row.financialStatus
-                        cqsSymbol = row.cqsSymbol
-                        nasdaqSymbol = row.nasdaqSymbol
-                        nextShares = row.nextShares
-                    }
-                }
-            }
-
-            return new(NasdaqDirectoryEntity::class).by {
-                sourceUri = parsedTable.sourceInfo.uri.toString()
-                retrievedAt = parsedTable.sourceInfo.retrievedAt
-                fileCreatedAt = parsedTable.fileCreationTime
-                this.entries = entries
-            }
+            return parsedTable.toDirectoryEntity()
         } catch (e: Exception) {
             logger.error("Failed to ingest tickers", e)
             throw e
@@ -136,6 +111,39 @@ class NasdaqSecurityDirectoryIngestor {
             uri = source,
             retrievedAt = Clock.System.now()
         )
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    private fun ParsedListingTable.toDirectoryEntity(): NasdaqDirectoryEntity {
+        val entries = value.map { row ->
+            NasdaqDirectoryEntryInput(
+                id = Uuid.generateV7(),
+                directoryId = 1,
+                security = NasdaqDirectoryEntryInput.TargetOf_security(
+                    nasdaqTraded = row.nasdaqTraded,
+                    symbol = row.symbol,
+                    securityName = row.securityName,
+                    listingExchange = row.listingExchange,
+                    marketCategory = row.marketCategory,
+                    etf = row.etf,
+                    roundLotSize = row.roundLotSize,
+                    testIssue = row.testIssue,
+                    financialStatus = row.financialStatus,
+                    cqsSymbol = row.cqsSymbol,
+                    nasdaqSymbol = row.nasdaqSymbol,
+                    nextShares = row.nextShares
+                )
+            ).toEntity()
+        }
+
+        return NasdaqDirectoryInput(
+            id = 1,
+            sourceUri = sourceInfo.uri.toString(),
+            retrievedAt = sourceInfo.retrievedAt,
+            fileCreatedAt = fileCreationTime
+        ).toEntity {
+            this.entries = entries
+        }
     }
 
     private fun exchangeOf(code: Char): Exchange =
