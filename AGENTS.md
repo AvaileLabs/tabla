@@ -11,6 +11,8 @@ relevant implementation before proposing changes.
 
 ## Database migrations
 
-- Create Flyway migrations using `./scripts/new-migration <description>`,
+- Only create Flyway migrations using `./scripts/new-migration <description>`,
   with lowercase snake_case descriptions.
-- Use PostgreSQL-native SQL and test migrations against PostgreSQL using Testcontainers.
+- Write PostgreSQL-native SQL with lowercase keywords and identifiers.
+- Format SQL using IntelliJ IDEA's formatter with the PostgreSQL dialect.
+- Once a Flyway migration is merged into the master branch, it may not be modified or deleted.
