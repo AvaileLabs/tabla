@@ -4,10 +4,7 @@ spring:
 
   docker:
     compose:
-      start:
-        skip: never
-        arguments:
-          - --force-recreate
+      lifecycle-management: start_only
 
   threads:
     virtual:
