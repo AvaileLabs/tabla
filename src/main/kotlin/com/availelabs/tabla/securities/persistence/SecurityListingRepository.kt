@@ -1,9 +1,11 @@
 package com.availelabs.tabla.securities.persistence
 
+import kotlinx.datetime.LocalDateTime
 import org.babyfish.jimmer.sql.DissociateAction
 import org.babyfish.jimmer.sql.ast.mutation.AssociatedSaveMode
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.kt.KSqlClient
+import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 
@@ -18,5 +20,12 @@ class SecurityListingRepository(
             setAssociatedMode(NasdaqDirectoryEntity::entries, AssociatedSaveMode.VIOLENTLY_REPLACE)
             setDissociateAction(NasdaqDirectoryEntryEntity::directory, DissociateAction.DELETE)
         }
+    }
+
+    fun getCreationTimeOfNasdaqDirectory(): LocalDateTime {
+        return sqlClient.createQuery(NasdaqDirectoryEntity::class) {
+            where(table.id eq 1)
+            select(table.fileCreatedAt)
+        }.fetchOne()
     }
 }
