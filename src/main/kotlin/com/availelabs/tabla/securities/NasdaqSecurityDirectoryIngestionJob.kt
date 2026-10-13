@@ -1,43 +1,45 @@
 package com.availelabs.tabla.securities
 
 import com.availelabs.tabla.securities.persistence.SecurityListingRepository
+import kotlinx.datetime.*
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.security.SecureRandom
-import java.time.Duration
-import java.time.LocalDate
-import java.time.ZoneId
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.toJavaInstant
 
 @Component
 class NasdaqSecurityDirectoryIngestionJob(
-    private val nasdaqSecurityDirectoryIngestor: NasdaqSecurityDirectoryIngestor,
+    private val ingestor: NasdaqSecurityDirectoryIngestor,
     private val repository: SecurityListingRepository,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // file report later
     private val taskScheduler: TaskScheduler
 ) : ApplicationRunner {
 
-    private val zone = ZoneId.of("America/New_York")
+    private val zone = TimeZone.of("America/New_York")
     private val random = SecureRandom()
 
-    override fun run(args: ApplicationArguments) {
-        ingest()
-    }
+    override fun run(args: ApplicationArguments) = ingest()
 
     @Scheduled(cron = "@midnight", zone = "America/New_York")
     fun runDaily() {
-        val midnight = LocalDate.now(zone).atStartOfDay(zone)
-        val window = Duration.between(midnight, midnight.withHour(5)).toMillis()
+        val today = Clock.System.todayIn(zone)
+        val start = today.atStartOfDayIn(zone)
+        val end = today.atTime(5, 0).toInstant(zone)
+        val scheduledAt = start + random.nextLong((end - start).inWholeMilliseconds).milliseconds
 
-        taskScheduler.schedule(
-            { ingest() },
-            midnight.toInstant().plusMillis(random.nextLong(window))
-        )
+        taskScheduler.schedule({ ingest() }, scheduledAt.toJavaInstant())
     }
 
     private fun ingest() {
-        repository.replaceNasdaqDirectory(nasdaqSecurityDirectoryIngestor.ingest())
+        val retrievedAt = repository.getRetrievalTimeOfNasdaqDirectory()
+        val lastRetrievedDate = retrievedAt?.toLocalDateTime(zone)?.date
+        if (lastRetrievedDate == Clock.System.todayIn(zone)) return
+
+        repository.replaceNasdaqDirectory(ingestor.ingest())
     }
 }
