@@ -1,4 +1,4 @@
-package com.availelabs.tabla.securities.persistence
+package com.availelabs.tabla.nasdaq.persistence
 
 import kotlinx.datetime.LocalDateTime
 import org.babyfish.jimmer.sql.Entity

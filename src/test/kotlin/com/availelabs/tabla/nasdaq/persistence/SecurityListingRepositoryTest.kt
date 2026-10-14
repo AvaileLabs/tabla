@@ -1,4 +1,4 @@
-package com.availelabs.tabla.securities.persistence
+package com.availelabs.tabla.nasdaq.persistence
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

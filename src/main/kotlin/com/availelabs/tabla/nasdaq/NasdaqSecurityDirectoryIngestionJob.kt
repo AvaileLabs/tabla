@@ -1,6 +1,6 @@
-package com.availelabs.tabla.securities
+package com.availelabs.tabla.nasdaq
 
-import com.availelabs.tabla.securities.persistence.SecurityListingRepository
+import com.availelabs.tabla.nasdaq.persistence.SecurityListingRepository
 import kotlinx.datetime.*
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner

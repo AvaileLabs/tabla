@@ -1,4 +1,4 @@
-export com.availelabs.tabla.securities.persistence.NasdaqDirectoryEntity
+export com.availelabs.tabla.nasdaq.persistence.NasdaqDirectoryEntity
 
 input NasdaqDirectoryInput {
     #allScalars(this)

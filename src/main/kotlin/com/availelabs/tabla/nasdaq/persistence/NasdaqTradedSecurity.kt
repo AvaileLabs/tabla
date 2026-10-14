@@ -1,4 +1,4 @@
-package com.availelabs.tabla.securities.persistence
+package com.availelabs.tabla.nasdaq.persistence
 
 import org.babyfish.jimmer.sql.Embeddable
 import org.jetbrains.kotlinx.dataframe.annotations.ColumnName
@@ -10,7 +10,7 @@ NasdaqSecurityDirectoryIngestor, but it's not persisted in the database.
  */
 @DataSchema
 interface NasdaqTestIssueSchema {
-    
+
     @ColumnName("Test Issue")
     val testIssue: Char
 }
