@@ -22,7 +22,8 @@ class SecurityListingRepository(
         }
     }
 
-    fun getRetrievalTimeOfNasdaqDirectory(): Instant? =
+    // Returns null if the Nasdaq directory has never been persisted.
+    fun getRetrievalTimeOfNasdaqDirectoryOrNull(): Instant? =
         sqlClient.createQuery(NasdaqDirectoryEntity::class) {
             where(table.id eq 1)
             select(table.retrievedAt)

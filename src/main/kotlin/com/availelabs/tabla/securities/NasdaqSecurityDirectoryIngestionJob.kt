@@ -36,7 +36,7 @@ class NasdaqSecurityDirectoryIngestionJob(
     }
 
     private fun ingest() {
-        val retrievedAt = repository.getRetrievalTimeOfNasdaqDirectory()
+        val retrievedAt = repository.getRetrievalTimeOfNasdaqDirectoryOrNull()
         val lastRetrievedDate = retrievedAt?.toLocalDateTime(zone)?.date
         if (lastRetrievedDate == Clock.System.todayIn(zone)) return
 
