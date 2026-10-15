@@ -5,6 +5,7 @@ import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.Id
 import org.babyfish.jimmer.sql.OneToMany
 import org.babyfish.jimmer.sql.Table
+import java.net.URI
 import kotlin.time.Instant
 
 @Entity
@@ -14,7 +15,7 @@ interface NasdaqDirectoryEntity {
     @Id
     val id: Int
 
-    val sourceUri: String
+    val sourceUri: URI
 
     val retrievedAt: Instant
 

@@ -75,7 +75,7 @@ class NasdaqDirectoryIngestor {
 
             return NasdaqDirectoryInput(
                 id = directoryId,
-                sourceUri = source.toString(),
+                sourceUri = source,
                 retrievedAt = retrievedAt,
                 fileCreatedAt = fileCreationTime
             ).toEntity {
