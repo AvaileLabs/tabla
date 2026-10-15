@@ -20,15 +20,15 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Component
-class NasdaqSecurityDirectoryIngestor {
-    private val logger = LoggerFactory.getLogger(NasdaqSecurityDirectoryIngestor::class.java)
-    private val nasdaqTradedSecuritiesSource = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
+class NasdaqDirectoryIngestor {
+    private val logger = LoggerFactory.getLogger(NasdaqDirectoryIngestor::class.java)
+    private val source = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
 
     fun ingest(): NasdaqDirectoryEntity {
         try {
             val markEmptyFieldsAsNull = ParserOptions(nullStrings = setOf(""))
 
-            val rawTable = readListingTable(nasdaqTradedSecuritiesSource, markEmptyFieldsAsNull)
+            val rawTable = readListingTable(source, markEmptyFieldsAsNull)
             val parsedTable = ParsedListingTable.parse(rawTable)
 
             return parsedTable.toDirectoryEntity()

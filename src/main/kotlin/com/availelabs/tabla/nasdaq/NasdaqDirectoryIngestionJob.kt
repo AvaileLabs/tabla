@@ -1,6 +1,6 @@
 package com.availelabs.tabla.nasdaq
 
-import com.availelabs.tabla.nasdaq.persistence.SecurityListingRepository
+import com.availelabs.tabla.nasdaq.persistence.NasdaqListingRepository
 import kotlinx.datetime.*
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -13,9 +13,9 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaInstant
 
 @Component
-class NasdaqSecurityDirectoryIngestionJob(
-    private val ingestor: NasdaqSecurityDirectoryIngestor,
-    private val repository: SecurityListingRepository,
+class NasdaqDirectoryIngestionJob(
+    private val ingestor: NasdaqDirectoryIngestor,
+    private val repository: NasdaqListingRepository,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // file report later
     private val taskScheduler: TaskScheduler
 ) : ApplicationRunner {

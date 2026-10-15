@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 import kotlin.time.Instant
 
 @Repository
-class SecurityListingRepository(
+class NasdaqListingRepository(
     private val sqlClient: KSqlClient
 ) {
     @Transactional

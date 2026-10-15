@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @Transactional
-class SecurityListingRepositoryTest @Autowired constructor(
-    private val repository: SecurityListingRepository,
+class NasdaqListingRepositoryTest @Autowired constructor(
+    private val repository: NasdaqListingRepository,
     private val jdbcTemplate: JdbcTemplate
 ) {
 
