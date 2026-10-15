@@ -16,8 +16,8 @@ enum class CalendarQuarter(val number: Int) {
 }
 
 data class EdgarQuarter(
+    val quarter: CalendarQuarter,
     val year: Int,
-    val quarter: CalendarQuarter
 ) {
     init {
         require(year >= 1993) {
