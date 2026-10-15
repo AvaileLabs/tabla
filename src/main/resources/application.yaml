@@ -21,3 +21,7 @@ jimmer:
   language: kotlin
   dialect: org.babyfish.jimmer.sql.dialect.PostgresDialect
   database-validation-mode: error
+
+tabla:
+  edgar:
+    user-agent: ${EDGAR_USER_AGENT}

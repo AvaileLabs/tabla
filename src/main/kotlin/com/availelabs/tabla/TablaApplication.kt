@@ -1,10 +1,12 @@
 package com.availelabs.tabla
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.boot.runApplication
 import org.springframework.scheduling.annotation.EnableScheduling
 
-@SpringBootApplication
+@SpringBootApplication(proxyBeanMethods = false)
+@ConfigurationPropertiesScan
 @EnableScheduling
 class TablaApplication
 
