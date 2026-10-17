@@ -2,9 +2,11 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.dataframe)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.springBoot)
     alias(libs.plugins.ksp)
+
 }
 
 group = "com.availelabs"
@@ -37,6 +39,7 @@ dependencies {
     implementation(libs.springBoot.starterFlyway)
     runtimeOnly(libs.flyway.postgresql)
     kapt(libs.springBoot.configurationProcessor)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)

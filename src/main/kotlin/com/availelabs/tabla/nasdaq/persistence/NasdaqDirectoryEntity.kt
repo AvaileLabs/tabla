@@ -16,9 +16,7 @@ interface NasdaqDirectoryEntity {
     val id: Int
 
     val sourceUri: URI
-
     val retrievedAt: Instant
-
     val fileCreatedAt: LocalDateTime
 
     @OneToMany(mappedBy = "directory")

@@ -3,7 +3,7 @@ kotlin = "2.5.0-Beta1"
 springBoot = "4.2.0-M2"
 springAi = "2.1.0-M1"
 springModulith = "2.2.0-M2"
-dataframe = "1.0.0-rc01"
+dataframe = "1.0.0-rc02"
 datetime = "0.8.0"
 jimmer = "0.12.4"
 ksp = "2.3.12"
@@ -34,6 +34,7 @@ flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql" }
 springBoot-testcontainers = { module = "org.springframework.boot:spring-boot-testcontainers" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 springBoot-configurationProcessor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -42,3 +43,4 @@ kotlin-dataframe = { id = "org.jetbrains.kotlin.plugin.dataframe", version.ref =
 springBoot = { id = "org.springframework.boot", version.ref = "springBoot" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
