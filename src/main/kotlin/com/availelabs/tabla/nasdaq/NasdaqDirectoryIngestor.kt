@@ -1,5 +1,6 @@
 package com.availelabs.tabla.nasdaq
 
+import com.availelabs.tabla.SourceCatalog
 import com.availelabs.tabla.SourceTimestamp
 import com.availelabs.tabla.Sourced
 import com.availelabs.tabla.sourcedBy
@@ -11,13 +12,12 @@ import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
-import java.net.URI
 import kotlin.time.Clock
 
 @Component
 class NasdaqDirectoryIngestor {
     private val logger = LoggerFactory.getLogger(NasdaqDirectoryIngestor::class.java)
-    val sourceUri = URI("https://www.nasdaqtrader.com/dynamic/SymDir/nasdaqtraded.txt")
+    val sourceUri = SourceCatalog.nasdaqDirectory
 
     fun download(): Sourced<ByteArray> {
         val bytes = sourceUri.toURL().openStream().use {

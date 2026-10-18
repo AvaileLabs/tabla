@@ -1,5 +1,6 @@
 package com.availelabs.tabla.edgar
 
+import com.availelabs.tabla.SourceCatalog
 import com.availelabs.tabla.Sourced
 import com.availelabs.tabla.sourcedBy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -25,8 +26,8 @@ class EdgarTickerMappingIngestor(
     private val properties: EdgarProperties
 ) {
     private val logger = LoggerFactory.getLogger(EdgarTickerMappingIngestor::class.java)
-    private val companySource = URI("https://www.sec.gov/files/company_tickers_exchange.json")
-    private val fundSource = URI("https://www.sec.gov/files/company_tickers_mf.json")
+    private val companySource = SourceCatalog.edgarCompanyTickers
+    private val fundSource = SourceCatalog.edgarMutualFundTickers
 
     fun ingest(): Pair<Sourced<DataFrame<EdgarCompanyTickerMapping>>, Sourced<DataFrame<EdgarMutualFundTickerMapping>>> {
         val companyDf = fetchTickerResponse(companySource)

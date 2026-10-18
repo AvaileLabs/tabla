@@ -5,6 +5,7 @@ import com.availelabs.tabla.persistence.snapshot.dto.SourceSnapshotInput
 import com.availelabs.tabla.sourcedBy
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.kt.KSqlClient
+import org.babyfish.jimmer.sql.kt.ast.expression.asc
 import org.babyfish.jimmer.sql.kt.ast.expression.desc
 import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.babyfish.jimmer.sql.kt.ast.expression.rowCount
@@ -49,9 +50,29 @@ class SourceSnapshotRepository(
                 it.content.sourcedBy(uri = it.sourceUri, retrievedAt = it.retrievedAt)
             }
 
-    fun countOf(sourceUri: URI): Long =
+    fun countOf(sourceUri: URI): Int =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
             where(table.sourceUri eq sourceUri)
             select(rowCount())
-        }.execute().single()
+        }.execute().single().toInt()
+
+    fun sourceUris(): List<URI> =
+        sqlClient.createQuery(SourceSnapshotEntity::class) {
+            select(table.sourceUri)
+        }.distinct().execute()
+
+    fun retainLatestOf(sourceUri: URI, keep: Int) {
+        require(keep >= 1)
+
+        val excess = countOf(sourceUri) - keep
+        if (excess <= 0) return
+
+        val oldestIds = sqlClient.createQuery(SourceSnapshotEntity::class) {
+            where(table.sourceUri eq sourceUri)
+            orderBy(table.retrievedAt.asc(), table.id.asc())
+            select(table.id)
+        }.limit(excess).execute()
+
+        sqlClient.deleteByIds(SourceSnapshotEntity::class, oldestIds)
+    }
 }
