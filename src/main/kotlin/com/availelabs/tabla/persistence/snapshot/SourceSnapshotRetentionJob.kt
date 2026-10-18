@@ -9,19 +9,20 @@ import org.springframework.stereotype.Component
 class SourceSnapshotRetentionJob(
     private val repository: SourceSnapshotRepository
 ) {
-    private val logger = LoggerFactory.getLogger(SourceSnapshotRetentionJob::class.java)
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    private val policies = mapOf(
+        SourceCatalog.nasdaqDirectory to 365,
+        SourceCatalog.edgarCompanyTickers to 10,
+        SourceCatalog.edgarMutualFundTickers to 10
+    )
 
     @Scheduled(cron = "@daily")
     fun runDaily() {
         for (sourceUri in repository.sourceUris()) {
-            val keep = when (sourceUri) {
-                SourceCatalog.nasdaqDirectory -> 365
-                SourceCatalog.edgarCompanyTickers -> 10
-                SourceCatalog.edgarMutualFundTickers -> 10
-                else -> {
-                    logger.warn("No snapshot retention policy for {}", sourceUri)
-                    continue
-                }
+            val keep = policies[sourceUri] ?: run {
+                logger.warn("No snapshot retention policy for {}", sourceUri)
+                continue
             }
 
             repository.retainLatestOf(sourceUri, keep)

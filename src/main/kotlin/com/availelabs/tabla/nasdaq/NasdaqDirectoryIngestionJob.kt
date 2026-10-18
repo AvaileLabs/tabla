@@ -41,7 +41,6 @@ class NasdaqDirectoryIngestionJob(
         if (lastRetrievedDate == Clock.System.todayIn(zone)) return
 
         val file = ingestor.download()
-        ingestor.parse(file) // returns unused value for now
         repository.save(file)
     }
 }
