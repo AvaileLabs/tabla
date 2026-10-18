@@ -1,13 +1,10 @@
-package com.availelabs.tabla.nasdaq.persistence
+package com.availelabs.tabla.nasdaq
 
-import org.babyfish.jimmer.sql.Embeddable
 import org.jetbrains.kotlinx.dataframe.annotations.ColumnName
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 
-/* The reason we don't include testIssue in NasdaqTradedSecurity is because @Embeddable is used to tell
-Jimmer ORM to map properties to database columns. The testIssue is needed for dataframe filtering in the
-NasdaqDirectoryIngestor, but it's not persisted in the database.
- */
+/* Allows testIssue to be defined separately from NasdaqTradedSecurity,
+even though both belong to the same CSV schema. */
 @DataSchema
 interface NasdaqTestIssueSchema {
 
@@ -16,7 +13,6 @@ interface NasdaqTestIssueSchema {
 }
 
 @DataSchema
-@Embeddable
 interface NasdaqTradedSecurity {
 
     @ColumnName("Nasdaq Traded")

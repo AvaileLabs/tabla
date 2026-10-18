@@ -39,10 +39,14 @@ data class Sourced<T>(
     val sourceInfo: SourceInfo
 )
 
-fun <T> T.sourcedBy(sourceInfo: SourceInfo): Sourced<T> =
+fun <T> T.sourcedBy(
+    uri: URI,
+    retrievedAt: Instant,
+    createdAt: SourceTimestamp? = null
+): Sourced<T> =
     Sourced(
         value = this,
-        sourceInfo = sourceInfo
+        sourceInfo = SourceInfo(uri, retrievedAt, createdAt)
     )
 
 data class HistoricalData<T>(

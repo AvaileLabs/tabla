@@ -1,6 +1,6 @@
 package com.availelabs.tabla.nasdaq
 
-import com.availelabs.tabla.nasdaq.persistence.NasdaqDirectoryRepository
+import com.availelabs.tabla.persistence.snapshot.SourceSnapshotRepository
 import kotlinx.datetime.*
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -15,7 +15,7 @@ import kotlin.time.toJavaInstant
 @Component
 class NasdaqDirectoryIngestionJob(
     private val ingestor: NasdaqDirectoryIngestor,
-    private val repository: NasdaqDirectoryRepository,
+    private val repository: SourceSnapshotRepository,
     @Suppress("SpringJavaInjectionPointsAutowiringInspection") // file report later
     private val taskScheduler: TaskScheduler
 ) : ApplicationRunner {
@@ -36,10 +36,12 @@ class NasdaqDirectoryIngestionJob(
     }
 
     private fun ingest() {
-        val retrievedAt = repository.getRetrievalTimeOfNasdaqDirectoryOrNull()
+        val retrievedAt = repository.latestRetrievalTimeOf(ingestor.sourceUri)
         val lastRetrievedDate = retrievedAt?.toLocalDateTime(zone)?.date
         if (lastRetrievedDate == Clock.System.todayIn(zone)) return
 
-        repository.replaceNasdaqDirectory(ingestor.ingest())
+        val file = ingestor.download()
+        ingestor.parse(file) // returns unused value for now
+        repository.save(file)
     }
 }
