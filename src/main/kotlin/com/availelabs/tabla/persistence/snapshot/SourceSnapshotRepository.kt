@@ -23,7 +23,7 @@ class SourceSnapshotRepository(
 ) {
 
     @OptIn(ExperimentalUuidApi::class)
-    fun save(snapshot: Sourced<ByteArray>) =
+    fun save(snapshot: Sourced<ByteArray>) {
         sqlClient.save(
             SourceSnapshotInput(
                 id = Uuid.generateV7(),
@@ -32,6 +32,7 @@ class SourceSnapshotRepository(
                 content = snapshot.value
             )
         ) { setMode(SaveMode.INSERT_ONLY) }
+    }
 
     fun latestRetrievalTimeOf(sourceUri: URI): Instant? =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
@@ -50,11 +51,11 @@ class SourceSnapshotRepository(
                 it.content.sourcedBy(uri = it.sourceUri, retrievedAt = it.retrievedAt)
             }
 
-    fun countOf(sourceUri: URI): Int =
+    fun countOf(sourceUri: URI): Long =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
             where(table.sourceUri eq sourceUri)
             select(rowCount())
-        }.execute().single().toInt()
+        }.execute().single()
 
     fun sourceUris(): List<URI> =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
@@ -71,7 +72,7 @@ class SourceSnapshotRepository(
             where(table.sourceUri eq sourceUri)
             orderBy(table.retrievedAt.asc(), table.id.asc())
             select(table.id)
-        }.limit(excess).execute()
+        }.limit(excess.toInt()).execute()
 
         sqlClient.deleteByIds(SourceSnapshotEntity::class, oldestIds)
     }
