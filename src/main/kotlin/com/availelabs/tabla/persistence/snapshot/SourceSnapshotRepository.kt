@@ -7,6 +7,7 @@ import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.kt.KSqlClient
 import org.babyfish.jimmer.sql.kt.ast.expression.desc
 import org.babyfish.jimmer.sql.kt.ast.expression.eq
+import org.babyfish.jimmer.sql.kt.ast.expression.rowCount
 import org.springframework.modulith.NamedInterface
 import org.springframework.stereotype.Repository
 import java.net.URI
@@ -47,4 +48,10 @@ class SourceSnapshotRepository(
             ?.let {
                 it.content.sourcedBy(uri = it.sourceUri, retrievedAt = it.retrievedAt)
             }
+
+    fun countOf(sourceUri: URI): Long =
+        sqlClient.createQuery(SourceSnapshotEntity::class) {
+            where(table.sourceUri eq sourceUri)
+            select(rowCount())
+        }.execute().single()
 }
