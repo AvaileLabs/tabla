@@ -12,9 +12,9 @@ class SourceSnapshotRetentionJob(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val policies = mapOf(
-        SourceCatalog.nasdaqDirectory to 365,
-        SourceCatalog.edgarCompanyTickers to 10,
-        SourceCatalog.edgarMutualFundTickers to 10
+        SourceCatalog.nasdaqDirectory.uri to 365,
+        SourceCatalog.edgarCompanyTickers.uri to 10,
+        SourceCatalog.edgarMutualFundTickers.uri to 10
     )
 
     @Scheduled(cron = "@daily")

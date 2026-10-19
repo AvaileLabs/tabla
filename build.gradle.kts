@@ -52,7 +52,11 @@ dependencies {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll(
+            "-Xjsr305=strict",
+            "-Xreturn-value-checker=check",
+        )
+        extraWarnings.set(true)
     }
 }
 

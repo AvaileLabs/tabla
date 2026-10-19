@@ -1,5 +1,7 @@
 package com.availelabs.tabla.persistence.snapshot
 
+import com.availelabs.tabla.SnapshotSource
+import com.availelabs.tabla.SourceFile
 import com.availelabs.tabla.Sourced
 import com.availelabs.tabla.persistence.snapshot.dto.SourceSnapshotInput
 import com.availelabs.tabla.sourcedBy
@@ -23,32 +25,36 @@ class SourceSnapshotRepository(
 ) {
 
     @OptIn(ExperimentalUuidApi::class)
-    fun save(snapshot: Sourced<ByteArray>) {
+    fun <T : SourceFile> save(source: SnapshotSource<T>, snapshot: Sourced<T>) {
+        require(snapshot.sourceInfo.uri == source.uri) {
+            "Snapshot URI ${snapshot.sourceInfo.uri} does not match source URI ${source.uri}"
+        }
+
         sqlClient.save(
             SourceSnapshotInput(
                 id = Uuid.generateV7(),
-                sourceUri = snapshot.sourceInfo.uri,
+                sourceUri = source.uri,
                 retrievedAt = snapshot.sourceInfo.retrievedAt,
-                content = snapshot.value
+                content = snapshot.value.bytes
             )
         ) { setMode(SaveMode.INSERT_ONLY) }
     }
 
-    fun latestRetrievalTimeOf(sourceUri: URI): Instant? =
+    fun latestRetrievalTimeOf(source: SnapshotSource<*>): Instant? =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
-            where(table.sourceUri eq sourceUri)
+            where(table.sourceUri eq source.uri)
             orderBy(table.retrievedAt.desc())
             select(table.retrievedAt)
         }.limit(1).execute().firstOrNull()
 
-    fun latestOf(sourceUri: URI): Sourced<ByteArray>? =
+    fun <T : SourceFile> latestOf(source: SnapshotSource<T>): Sourced<T>? =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
-            where(table.sourceUri eq sourceUri)
+            where(table.sourceUri eq source.uri)
             orderBy(table.retrievedAt.desc())
             select(table)
         }.limit(1).execute().firstOrNull()
             ?.let {
-                it.content.sourcedBy(uri = it.sourceUri, retrievedAt = it.retrievedAt)
+                it.content.sourcedBy(source = source, retrievedAt = it.retrievedAt)
             }
 
     fun countOf(sourceUri: URI): Long =

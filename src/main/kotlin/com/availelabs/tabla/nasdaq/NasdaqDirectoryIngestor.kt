@@ -1,9 +1,6 @@
 package com.availelabs.tabla.nasdaq
 
-import com.availelabs.tabla.SourceCatalog
-import com.availelabs.tabla.SourceTimestamp
-import com.availelabs.tabla.Sourced
-import com.availelabs.tabla.sourcedBy
+import com.availelabs.tabla.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
@@ -17,22 +14,22 @@ import kotlin.time.Clock
 @Component
 class NasdaqDirectoryIngestor {
     private val logger = LoggerFactory.getLogger(NasdaqDirectoryIngestor::class.java)
-    val sourceUri = SourceCatalog.nasdaqDirectory
+    val source = SourceCatalog.nasdaqDirectory
 
-    fun download(): Sourced<ByteArray> {
-        val bytes = sourceUri.toURL().openStream().use {
+    fun download(): Sourced<NasdaqDirectoryRawFile> {
+        val bytes = source.uri.toURL().openStream().use {
             it.readBytes()
         }
 
         return bytes.sourcedBy(
-            uri = sourceUri,
+            source = source,
             retrievedAt = Clock.System.now()
         )
     }
 
-    fun parse(file: Sourced<ByteArray>): Sourced<DataFrame<NasdaqTradedSecurity>> {
+    fun parse(file: Sourced<NasdaqDirectoryRawFile>): Sourced<DataFrame<NasdaqTradedSecurity>> {
         val rawTable = DataFrame.readCsv(
-            inputStream = ByteArrayInputStream(file.value),
+            inputStream = ByteArrayInputStream(file.value.bytes),
             delimiter = '|',
             parserOptions = ParserOptions(nullStrings = setOf(""))
         ).cast<NasdaqTradedSecurity>(verify = false)

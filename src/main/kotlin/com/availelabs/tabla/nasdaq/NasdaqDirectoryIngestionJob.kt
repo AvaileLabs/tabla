@@ -36,11 +36,11 @@ class NasdaqDirectoryIngestionJob(
     }
 
     private fun ingest() {
-        val retrievedAt = repository.latestRetrievalTimeOf(ingestor.sourceUri)
+        val retrievedAt = repository.latestRetrievalTimeOf(ingestor.source)
         val lastRetrievedDate = retrievedAt?.toLocalDateTime(zone)?.date
         if (lastRetrievedDate == Clock.System.todayIn(zone)) return
 
         val file = ingestor.download()
-        repository.save(file)
+        repository.save(ingestor.source, file)
     }
 }
