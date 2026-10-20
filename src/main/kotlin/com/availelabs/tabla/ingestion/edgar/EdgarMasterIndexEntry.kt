@@ -1,4 +1,4 @@
-package com.availelabs.tabla.edgar
+package com.availelabs.tabla.ingestion.edgar
 
 import kotlinx.datetime.LocalDate
 import org.jetbrains.kotlinx.dataframe.annotations.ColumnName

@@ -1,4 +1,4 @@
-package com.availelabs.tabla.edgar
+package com.availelabs.tabla.ingestion.edgar
 
 import kotlinx.datetime.Month
 import java.net.URI

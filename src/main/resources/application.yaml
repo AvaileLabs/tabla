@@ -24,4 +24,4 @@ jimmer:
 
 tabla:
   edgar:
-    user-agent: ${EDGAR_USER_AGENT}
+    user-agent: ${EDGAR_USER_AGENT:}

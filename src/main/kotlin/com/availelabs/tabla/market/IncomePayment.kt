@@ -1,4 +1,4 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.market
 
 import kotlinx.datetime.LocalDate
 import java.math.BigDecimal

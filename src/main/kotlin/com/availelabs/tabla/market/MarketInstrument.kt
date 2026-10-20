@@ -1,5 +1,7 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.market
 
+import com.availelabs.tabla.provenance.HistoricalData
+import com.availelabs.tabla.provenance.Sourced
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 

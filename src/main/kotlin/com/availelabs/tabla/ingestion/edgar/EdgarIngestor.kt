@@ -1,7 +1,7 @@
-package com.availelabs.tabla.edgar
+package com.availelabs.tabla.ingestion.edgar
 
-import com.availelabs.tabla.Sourced
-import com.availelabs.tabla.sourcedBy
+import com.availelabs.tabla.provenance.Sourced
+import com.availelabs.tabla.provenance.sourcedBy
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.ParserOptions
 import org.jetbrains.kotlinx.dataframe.api.cast
@@ -9,10 +9,8 @@ import org.jetbrains.kotlinx.dataframe.io.ColType
 import org.jetbrains.kotlinx.dataframe.io.Compression
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.springframework.http.HttpHeaders
-import org.springframework.stereotype.Component
 import kotlin.time.Clock
 
-@Component
 class EdgarIngestor(
     private val properties: EdgarProperties
 ) {

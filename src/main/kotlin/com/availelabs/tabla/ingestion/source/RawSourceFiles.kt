@@ -1,4 +1,4 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.ingestion.source
 
 @JvmInline
 value class EdgarCompanyTickersRawFile internal constructor(
@@ -14,4 +14,3 @@ value class EdgarFundTickersRawFile internal constructor(
 value class NasdaqDirectoryRawFile internal constructor(
     override val bytes: ByteArray
 ) : SourceFile
-

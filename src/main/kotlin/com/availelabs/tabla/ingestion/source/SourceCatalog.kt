@@ -1,4 +1,4 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.ingestion.source
 
 import java.net.URI
 

@@ -1,6 +1,13 @@
-package com.availelabs.tabla.edgar
+package com.availelabs.tabla.ingestion.edgar
 
-import com.availelabs.tabla.*
+import com.availelabs.tabla.ingestion.source.EdgarCompanyTickersRawFile
+import com.availelabs.tabla.ingestion.source.EdgarFundTickersRawFile
+import com.availelabs.tabla.ingestion.source.SnapshotSource
+import com.availelabs.tabla.ingestion.source.SourceCatalog
+import com.availelabs.tabla.ingestion.source.SourceFile
+import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.provenance.Sourced
+import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -13,17 +20,13 @@ import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpHeaders
-import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
-@Component
 class EdgarTickerMappingIngestor(
     private val properties: EdgarProperties
 ) {
-    private val logger = LoggerFactory.getLogger(EdgarTickerMappingIngestor::class.java)
     val companySource = SourceCatalog.edgarCompanyTickers
     val fundSource = SourceCatalog.edgarMutualFundTickers
 

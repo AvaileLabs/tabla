@@ -1,4 +1,4 @@
-export com.availelabs.tabla.persistence.snapshot.SourceSnapshotEntity
+export com.availelabs.tabla.ingestion.snapshot.SourceSnapshotEntity
 
 input SourceSnapshotInput {
     #allScalars(this)

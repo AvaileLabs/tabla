@@ -1,19 +1,20 @@
-package com.availelabs.tabla.nasdaq
+package com.availelabs.tabla.ingestion.nasdaq
 
-import com.availelabs.tabla.*
+import com.availelabs.tabla.ingestion.source.NasdaqDirectoryRawFile
+import com.availelabs.tabla.ingestion.source.SourceCatalog
+import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.provenance.SourceTimestamp
+import com.availelabs.tabla.provenance.Sourced
+import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
-@Component
 class NasdaqDirectoryIngestor {
-    private val logger = LoggerFactory.getLogger(NasdaqDirectoryIngestor::class.java)
     val source = SourceCatalog.nasdaqDirectory
 
     fun download(): Sourced<NasdaqDirectoryRawFile> {

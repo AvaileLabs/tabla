@@ -1,4 +1,4 @@
-package com.availelabs.tabla.edgar
+package com.availelabs.tabla.ingestion.edgar
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
@@ -15,7 +15,7 @@ data class EdgarProperties(
 ) {
     init {
         require(userAgent.isNotBlank()) {
-            "SEC EDGAR User-Agent must be configured (EDGAR_USER_AGENT)"
+            "Set EDGAR_USER_AGENT to an application name and contact email (e.g., 'Tabla contact@example.com')"
         }
     }
 }

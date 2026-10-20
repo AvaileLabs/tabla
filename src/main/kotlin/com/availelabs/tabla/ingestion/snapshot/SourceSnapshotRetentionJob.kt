@@ -1,6 +1,6 @@
-package com.availelabs.tabla.persistence.snapshot
+package com.availelabs.tabla.ingestion.snapshot
 
-import com.availelabs.tabla.SourceCatalog
+import com.availelabs.tabla.ingestion.source.SourceCatalog
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component

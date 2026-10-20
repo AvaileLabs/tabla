@@ -1,25 +1,28 @@
-package com.availelabs.tabla.persistence.snapshot
+package com.availelabs.tabla.ingestion.snapshot
 
-import com.availelabs.tabla.SnapshotSource
-import com.availelabs.tabla.SourceFile
-import com.availelabs.tabla.Sourced
-import com.availelabs.tabla.persistence.snapshot.dto.SourceSnapshotInput
-import com.availelabs.tabla.sourcedBy
+import com.availelabs.tabla.ingestion.internal.APP_TIME_ZONE
+import com.availelabs.tabla.ingestion.snapshot.dto.SourceSnapshotInput
+import com.availelabs.tabla.ingestion.source.SnapshotSource
+import com.availelabs.tabla.ingestion.source.SourceFile
+import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.provenance.Sourced
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.todayIn
 import org.babyfish.jimmer.sql.ast.mutation.SaveMode
 import org.babyfish.jimmer.sql.kt.KSqlClient
 import org.babyfish.jimmer.sql.kt.ast.expression.asc
 import org.babyfish.jimmer.sql.kt.ast.expression.desc
 import org.babyfish.jimmer.sql.kt.ast.expression.eq
 import org.babyfish.jimmer.sql.kt.ast.expression.rowCount
-import org.springframework.modulith.NamedInterface
 import org.springframework.stereotype.Repository
 import java.net.URI
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
-@NamedInterface
 class SourceSnapshotRepository(
     private val sqlClient: KSqlClient
 ) {
@@ -82,4 +85,11 @@ class SourceSnapshotRepository(
 
         sqlClient.deleteByIds(SourceSnapshotEntity::class, oldestIds)
     }
+
+    fun wasRetrievedToday(
+        source: SnapshotSource<*>,
+        zone: TimeZone = APP_TIME_ZONE
+    ): Boolean =
+        latestRetrievalTimeOf(source)
+            ?.toLocalDateTime(zone)?.date == Clock.System.todayIn(zone)
 }

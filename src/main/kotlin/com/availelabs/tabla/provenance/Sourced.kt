@@ -1,4 +1,4 @@
-package com.availelabs.tabla
+package com.availelabs.tabla.provenance
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -48,23 +48,6 @@ fun <T> T.sourcedBy(
     Sourced(
         value = this,
         sourceInfo = SourceInfo(uri, retrievedAt, createdAt)
-    )
-
-/**
- * Attaches source metadata to raw bytes, wrapping them in a source-specific
- * type (e.g., EdgarCompanyTickersRawFile instead of ByteArray) so function
- * parameters and return types can distinguish one source's ByteArray
- * from another's.
- */
-fun <T : SourceFile> ByteArray.sourcedBy(
-    source: SnapshotSource<T>,
-    retrievedAt: Instant,
-    createdAt: SourceTimestamp? = null
-): Sourced<T> =
-    source.wrap(this).sourcedBy(
-        uri = source.uri,
-        retrievedAt = retrievedAt,
-        createdAt = createdAt
     )
 
 data class HistoricalData<T>(

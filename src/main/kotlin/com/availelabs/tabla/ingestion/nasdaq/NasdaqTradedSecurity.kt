@@ -1,4 +1,4 @@
-package com.availelabs.tabla.nasdaq
+package com.availelabs.tabla.ingestion.nasdaq
 
 import org.jetbrains.kotlinx.dataframe.annotations.ColumnName
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema

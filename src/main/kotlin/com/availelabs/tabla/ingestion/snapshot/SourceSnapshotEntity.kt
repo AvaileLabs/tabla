@@ -1,4 +1,4 @@
-package com.availelabs.tabla.persistence.snapshot
+package com.availelabs.tabla.ingestion.snapshot
 
 import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.Id
