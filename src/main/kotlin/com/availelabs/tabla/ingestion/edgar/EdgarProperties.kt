@@ -15,7 +15,8 @@ data class EdgarProperties(
 ) {
     init {
         require(userAgent.isNotBlank()) {
-            "Set EDGAR_USER_AGENT to an application name and contact email (e.g., 'Tabla contact@example.com')"
+            "The EDGAR_USER_AGENT environment variable must be set to an application name " +
+                    "and contact email address (e.g., 'Tabla contact@example.com')."
         }
     }
 }
