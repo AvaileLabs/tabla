@@ -23,13 +23,10 @@ class IngestionPipeline(
     fun run() {
         registry.targets.forEach { ingest(it) }
 
-        val rawNasdaq = checkNotNull(
-            repository.latestOf(SourceCatalog.nasdaqDirectory)
-        ) { "NASDAQ snapshot must exist before reconciliation" }
-
-        val rawEdgar = checkNotNull(
-            repository.latestOf(SourceCatalog.edgarCompanyTickers)
-        ) { "SEC EDGAR snapshot must exist before reconciliation" }
+        val rawNasdaq = checkNotNull(repository.latestOf(SourceCatalog.nasdaqDirectory))
+        { "NASDAQ snapshot must exist before reconciliation" }
+        val rawEdgar = checkNotNull(repository.latestOf(SourceCatalog.edgarCompanyTickers))
+        { "SEC EDGAR snapshot must exist before reconciliation" }
 
         val nasdaq = nasdaqIngestor.parse(rawNasdaq)
         val edgar = edgarIngestor.ingestCompanies(rawEdgar)

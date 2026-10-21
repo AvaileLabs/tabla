@@ -27,12 +27,14 @@ dependencies {
 
     implementation(libs.springBoot.starter)
     implementation(libs.springBoot.starterRestClient)
+    implementation(libs.springBoot.starterActuator)
     implementation(libs.springAi.starterMcpServerWebmvc)
     implementation(libs.kotlin.reflect)
     implementation(libs.springModulith.starterCore)
     runtimeOnly(libs.springModulith.runtime)
     implementation(libs.kotlinx.dataframe)
     implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.jimmer.springBootStarter)
     ksp(libs.jimmer.ksp)
     runtimeOnly(libs.postgresql)
@@ -54,9 +56,11 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
-            "-Xreturn-value-checker=check",
-        )
+            "-Xreturn-value-checker=full",
+            "-Xconsistent-data-class-copy-visibility",
+            )
         extraWarnings.set(true)
+        progressiveMode.set(true)
     }
 }
 

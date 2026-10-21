@@ -7,6 +7,8 @@ import com.availelabs.tabla.ingestion.nasdaq.cqsSymbol
 import com.availelabs.tabla.ingestion.nasdaq.nasdaqSymbol
 import com.availelabs.tabla.ingestion.nasdaq.symbol
 import com.availelabs.tabla.provenance.Sourced
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.DataRow
 import org.jetbrains.kotlinx.dataframe.api.count
@@ -45,6 +47,6 @@ private val exact: Rule = { nasdaq, edgar ->
 private fun DataRow<NasdaqTradedSecurity>.symbolAliases() =
     sequenceOf(symbol, cqsSymbol, nasdaqSymbol)
 
-private val rules: List<Rule> = listOf(
+private val rules: ImmutableList<Rule> = persistentListOf(
     exact
 )

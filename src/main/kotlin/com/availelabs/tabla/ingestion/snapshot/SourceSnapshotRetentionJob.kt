@@ -1,6 +1,7 @@
 package com.availelabs.tabla.ingestion.snapshot
 
 import com.availelabs.tabla.ingestion.source.SourceCatalog
+import kotlinx.collections.immutable.persistentHashMapOf
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -11,7 +12,7 @@ class SourceSnapshotRetentionJob(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val policies = mapOf(
+    private val policies = persistentHashMapOf(
         SourceCatalog.nasdaqDirectory.uri to 365,
         SourceCatalog.edgarCompanyTickers.uri to 10,
         SourceCatalog.edgarMutualFundTickers.uri to 10

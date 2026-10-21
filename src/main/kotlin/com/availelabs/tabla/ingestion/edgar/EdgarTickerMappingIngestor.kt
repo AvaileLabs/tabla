@@ -103,7 +103,7 @@ data class EdgarMutualFundTickerMapping(
 )
 
 @Serializable
-data class SecTickerResponse(
+private data class SecTickerResponse(
     val fields: List<String>,
     val data: List<List<JsonElement>>
 )

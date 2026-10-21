@@ -26,7 +26,6 @@ data class SecuritySymbols(
     val cqsSymbol: String?
 )
 
-@ConsistentCopyVisibility
 data class Listing private constructor(
     val symbols: SecuritySymbols,
     val name: String,

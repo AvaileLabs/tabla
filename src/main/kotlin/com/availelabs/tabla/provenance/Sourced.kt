@@ -1,5 +1,6 @@
 package com.availelabs.tabla.provenance
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import java.net.URI
@@ -51,11 +52,11 @@ fun <T> T.sourcedBy(
     )
 
 data class HistoricalData<T>(
-    val segments: List<HistoricalDataSegment<T>>
+    val segments: ImmutableList<HistoricalDataSegment<T>>
 )
 
 data class HistoricalDataSegment<T>(
-    val observations: List<T>,
+    val observations: ImmutableList<T>,
     val coverage: DateCoverage,
     val sourceInfo: SourceInfo
 )

@@ -6,6 +6,8 @@ import com.availelabs.tabla.ingestion.source.SnapshotSource
 import com.availelabs.tabla.ingestion.source.SourceFile
 import com.availelabs.tabla.ingestion.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
@@ -66,10 +68,10 @@ class SourceSnapshotRepository(
             select(rowCount())
         }.execute().single()
 
-    fun sourceUris(): List<URI> =
+    fun sourceUris(): ImmutableList<URI> =
         sqlClient.createQuery(SourceSnapshotEntity::class) {
             select(table.sourceUri)
-        }.distinct().execute()
+        }.distinct().execute().toImmutableList()
 
     fun retainLatestOf(sourceUri: URI, keep: Int) {
         require(keep >= 1)

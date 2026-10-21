@@ -7,6 +7,7 @@ dataframe = "1.0.0-rc02"
 datetime = "0.8.0"
 jimmer = "0.12.4"
 ksp = "2.3.12"
+kotlinxImmutable = "0.5.2"
 
 [libraries]
 springBoot-bom = { module = "org.springframework.boot:spring-boot-dependencies", version.ref = "springBoot" }
@@ -17,6 +18,7 @@ springBoot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 springBoot-starterRestClient = { module = "org.springframework.boot:spring-boot-starter-restclient" }
 springBoot-starterTest = { module = "org.springframework.boot:spring-boot-starter-test" }
 springBoot-dockerCompose = { module = "org.springframework.boot:spring-boot-docker-compose" }
+springBoot-starterActuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springAi-starterMcpServerWebmvc = { module = "org.springframework.ai:spring-ai-starter-mcp-server-webmvc" }
 springModulith-starterCore = { module = "org.springframework.modulith:spring-modulith-starter-core" }
 springModulith-starterTest = { module = "org.springframework.modulith:spring-modulith-starter-test" }
@@ -24,6 +26,7 @@ springModulith-runtime = { module = "org.springframework.modulith:spring-modulit
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
 kotlinx-dataframe = { module = "org.jetbrains.kotlinx:dataframe", version.ref = "dataframe" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "datetime" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxImmutable" }
 kotlin-testJunit5 = { module = "org.jetbrains.kotlin:kotlin-test-junit5" }
 junit-platformLauncher = { module = "org.junit.platform:junit-platform-launcher" }
 jimmer-springBootStarter = { module = "org.babyfish.jimmer:jimmer-spring-boot-starter", version.ref = "jimmer" }
