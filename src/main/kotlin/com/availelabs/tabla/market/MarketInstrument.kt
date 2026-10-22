@@ -27,12 +27,20 @@ data class SecuritySymbols(
 )
 
 data class Listing private constructor(
+    val cik: Int,
     val symbols: SecuritySymbols,
     val name: String,
     val exchange: Exchange
 ) {
     companion object {
-        fun of(symbols: SecuritySymbols, name: String, exchange: Exchange): Listing {
+        fun of(
+            cik: Int,
+            symbols: SecuritySymbols,
+            name: String,
+            exchange: Exchange
+        ): Listing {
+            require(cik > 0) { "CIK must be positive" }
+
             val normalizedSymbols = symbols.copy(
                 symbol = symbols.symbol.trim().uppercase(),
                 nasdaqSymbol = symbols.nasdaqSymbol.trim().uppercase(),
@@ -45,6 +53,7 @@ data class Listing private constructor(
             require(normalizedName.isNotEmpty()) { "Name cannot be empty" }
 
             return Listing(
+                cik = cik,
                 symbols = normalizedSymbols,
                 name = normalizedName,
                 exchange = exchange

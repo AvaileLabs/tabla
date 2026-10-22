@@ -1,52 +1,109 @@
 package com.availelabs.tabla.ingestion.reconciliation
 
 import com.availelabs.tabla.ingestion.edgar.EdgarCompanyTickerMapping
+import com.availelabs.tabla.ingestion.edgar.cik
+import com.availelabs.tabla.ingestion.edgar.name
 import com.availelabs.tabla.ingestion.edgar.ticker
-import com.availelabs.tabla.ingestion.nasdaq.NasdaqTradedSecurity
-import com.availelabs.tabla.ingestion.nasdaq.cqsSymbol
-import com.availelabs.tabla.ingestion.nasdaq.nasdaqSymbol
-import com.availelabs.tabla.ingestion.nasdaq.symbol
+import com.availelabs.tabla.ingestion.nasdaq.*
+import com.availelabs.tabla.market.Exchange
+import com.availelabs.tabla.market.Listing
+import com.availelabs.tabla.market.SecuritySymbols
 import com.availelabs.tabla.provenance.Sourced
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.DataRow
-import org.jetbrains.kotlinx.dataframe.api.count
-import org.jetbrains.kotlinx.dataframe.api.innerJoinWith
+import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
+import org.jetbrains.kotlinx.dataframe.api.innerJoin
+import org.jetbrains.kotlinx.dataframe.api.print
+import org.jetbrains.kotlinx.dataframe.api.rows
+import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 
 class EdgarNasdaqTickerReconciliation {
 
     fun reconcile(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ) {
-        val exactMatches = nasdaq.value.innerJoinWith(edgar.value) {
-            exact(this, right)
-        }
+    ): ImmutableList<Listing> {
+        val nasdaqAliases = nasdaq.value.rows()
+            .withIndex()
+            .flatMap { [index, row] ->
+                listOfNotNull(
+                    row.symbol,
+                    row.cqsSymbol,
+                    row.nasdaqSymbol
+                ).distinct().map { alias ->
+                    NasdaqAlias(index, row.symbol, alias)
+                }
+            }
+            .toDataFrame()
 
-        println("Exact matches: ${exactMatches.count()}")
-        println(exactMatches)
+        val edgarTickers = edgar.value.rows()
+            .withIndex()
+            .map { [index, row] ->
+                EdgarTicker(index, row.ticker, row.cik, row.name)
+            }
+            .toDataFrame()
+
+        val matches = nasdaqAliases.innerJoin(edgarTickers) { ticker }
+        matches.print()
+
+        return matches.rows()
+            .groupBy { it.nasdaqRowIndex }
+            .map { [nasdaqRowIndex, tickerMatches] ->
+                val security = nasdaq.value[nasdaqRowIndex]
+                val ciks = tickerMatches.map { it.cik }.distinct()
+                require(ciks.size == 1) {
+                    "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
+                }
+                Listing.of(
+                    cik = ciks.single(),
+                    symbols = SecuritySymbols(
+                        symbol = security.symbol,
+                        nasdaqSymbol = security.nasdaqSymbol,
+                        cqsSymbol = security.cqsSymbol
+                    ),
+                    name = security.securityName,
+                    exchange = when (val code = security.listingExchange) {
+                        'Q' -> Exchange.NASDAQ
+                        'A' -> Exchange.NYSE_AMERICAN
+                        'N' -> Exchange.NYSE
+                        'P' -> Exchange.NYSE_ARCA
+                        'Z' -> Exchange.CBOE_BZX
+                        'V' -> Exchange.IEX
+                        'F' -> Exchange.TXSE
+                        'M' -> Exchange.NYSE_TEXAS
+                        else -> error("Unknown NASDAQ listing exchange '$code' for ${security.symbol}")
+                    }
+                )
+            }
+            .toImmutableList()
     }
 }
 
-/* file report that imports aren't suggested automatically by IDE.
-import com.availelabs.tabla.ingestion.nasdaq.cqsSymbol
-import com.availelabs.tabla.ingestion.nasdaq.nasdaqSymbol
-import com.availelabs.tabla.ingestion.nasdaq.symbol
-import com.availelabs.tabla.ingestion.edgar.ticker
- */
-private typealias Rule = (
-    DataRow<NasdaqTradedSecurity>,
-    DataRow<EdgarCompanyTickerMapping>
-) -> Boolean
+@DataSchema
+data class NasdaqAlias(
+    val nasdaqRowIndex: Int,
+    val nasdaqSymbol: String,
+    val ticker: String
+)
 
-private val exact: Rule = { nasdaq, edgar ->
-    nasdaq.symbolAliases().any { it == edgar.ticker }
-}
+@DataSchema
+data class EdgarTicker(
+    val edgarRowIndex: Int,
+    val ticker: String,
+    val cik: Int,
+    val companyName: String
+)
 
-private fun DataRow<NasdaqTradedSecurity>.symbolAliases() =
-    sequenceOf(symbol, cqsSymbol, nasdaqSymbol)
+private data class TickerMatch(
+    val nasdaqSymbol: String,
+    val edgarTicker: String,
+    val edgarCik: Int,
+    val companyName: String,
+    val matchedBy: String
+)
 
-private val rules: ImmutableList<Rule> = persistentListOf(
-    exact
+private data class ReconciliationPair(
+    val nasdaqRowIndex: Int,
+    val edgarRowIndex: Int
 )
