@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
+
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
@@ -6,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.springBoot)
     alias(libs.plugins.ksp)
-
 }
 
 group = "com.availelabs"
@@ -16,6 +17,7 @@ description = "tabla"
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(27)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
@@ -54,11 +56,14 @@ dependencies {
 
 kotlin {
     compilerOptions {
+        jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
+
         freeCompilerArgs.addAll(
             "-Xjsr305=strict",
             "-Xreturn-value-checker=full",
             "-Xconsistent-data-class-copy-visibility",
-            )
+        )
+
         extraWarnings.set(true)
         progressiveMode.set(true)
     }

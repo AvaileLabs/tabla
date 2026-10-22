@@ -53,7 +53,7 @@ class NasdaqDirectoryIngestor {
         val df = rawTable
             .drop { nasdaqTraded.startsWith(prefix) }
             .cast<NasdaqTestIssueSchema>(verify = true)
-            .drop { testIssue != 'N' }
+            .filter { testIssue == 'N' }
             .remove { testIssue }
             .cast<NasdaqTradedSecurity>(verify = true)
 
