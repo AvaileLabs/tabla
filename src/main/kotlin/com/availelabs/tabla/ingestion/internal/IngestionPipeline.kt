@@ -1,8 +1,7 @@
-package com.availelabs.tabla.ingestion
+package com.availelabs.tabla.ingestion.internal
 
 import com.availelabs.tabla.ingestion.edgar.EdgarProperties
 import com.availelabs.tabla.ingestion.edgar.EdgarTickerMappingIngestor
-import com.availelabs.tabla.ingestion.internal.*
 import com.availelabs.tabla.ingestion.nasdaq.NasdaqDirectoryIngestor
 import com.availelabs.tabla.ingestion.reconciliation.EdgarNasdaqTickerReconciliation
 import com.availelabs.tabla.ingestion.snapshot.SourceSnapshotRepository

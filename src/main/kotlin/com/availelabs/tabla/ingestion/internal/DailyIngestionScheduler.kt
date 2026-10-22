@@ -1,6 +1,5 @@
 package com.availelabs.tabla.ingestion.internal
 
-import com.availelabs.tabla.ingestion.IngestionPipeline
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
