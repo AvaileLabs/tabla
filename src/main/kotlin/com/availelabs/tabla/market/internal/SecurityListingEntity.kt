@@ -1,5 +1,6 @@
-package com.availelabs.tabla.market
+package com.availelabs.tabla.market.internal
 
+import com.availelabs.tabla.market.Exchange
 import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.Id
 import org.babyfish.jimmer.sql.Table

@@ -6,7 +6,7 @@ import com.availelabs.tabla.ingestion.edgar.name
 import com.availelabs.tabla.ingestion.edgar.ticker
 import com.availelabs.tabla.ingestion.nasdaq.*
 import com.availelabs.tabla.market.Exchange
-import com.availelabs.tabla.market.Listing
+import com.availelabs.tabla.market.SecurityListing
 import com.availelabs.tabla.market.SecuritySymbols
 import com.availelabs.tabla.provenance.Sourced
 import kotlinx.collections.immutable.ImmutableList
@@ -18,12 +18,12 @@ import org.jetbrains.kotlinx.dataframe.api.print
 import org.jetbrains.kotlinx.dataframe.api.rows
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 
-class EdgarNasdaqTickerReconciliation {
+class EdgarNasdaqListingReconciler {
 
     fun reconcile(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ): ImmutableList<Listing> {
+    ): ImmutableList<SecurityListing> {
         val nasdaqAliases = nasdaq.value.rows()
             .withIndex()
             .flatMap { [index, row] ->
@@ -55,7 +55,7 @@ class EdgarNasdaqTickerReconciliation {
                 require(ciks.size == 1) {
                     "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
                 }
-                Listing.of(
+                SecurityListing.of(
                     cik = ciks.single(),
                     symbols = SecuritySymbols(
                         symbol = security.symbol,

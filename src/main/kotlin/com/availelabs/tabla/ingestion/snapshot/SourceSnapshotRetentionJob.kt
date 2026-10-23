@@ -3,10 +3,7 @@ package com.availelabs.tabla.ingestion.snapshot
 import com.availelabs.tabla.ingestion.source.SourceCatalog
 import kotlinx.collections.immutable.persistentHashMapOf
 import org.slf4j.LoggerFactory
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 
-@Component
 class SourceSnapshotRetentionJob(
     private val repository: SourceSnapshotRepository
 ) {
@@ -18,8 +15,7 @@ class SourceSnapshotRetentionJob(
         SourceCatalog.edgarMutualFundTickers.uri to 10
     )
 
-    @Scheduled(cron = "@daily")
-    fun runDaily() {
+    fun run() {
         for (sourceUri in repository.sourceUris()) {
             val keep = policies[sourceUri] ?: run {
                 logger.warn("No snapshot retention policy for {}", sourceUri)

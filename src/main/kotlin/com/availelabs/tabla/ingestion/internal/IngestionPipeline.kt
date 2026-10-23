@@ -3,13 +3,11 @@ package com.availelabs.tabla.ingestion.internal
 import com.availelabs.tabla.ingestion.edgar.EdgarProperties
 import com.availelabs.tabla.ingestion.edgar.EdgarTickerMappingIngestor
 import com.availelabs.tabla.ingestion.nasdaq.NasdaqDirectoryIngestor
-import com.availelabs.tabla.ingestion.reconciliation.EdgarNasdaqTickerReconciliation
+import com.availelabs.tabla.ingestion.reconciliation.EdgarNasdaqListingReconciler
 import com.availelabs.tabla.ingestion.snapshot.SourceSnapshotRepository
 import com.availelabs.tabla.ingestion.source.SourceCatalog
 import com.availelabs.tabla.ingestion.source.SourceFile
-import org.springframework.stereotype.Component
 
-@Component
 class IngestionPipeline(
     private val repository: SourceSnapshotRepository,
     edgarProperties: EdgarProperties
@@ -17,7 +15,7 @@ class IngestionPipeline(
     private val nasdaqIngestor = NasdaqDirectoryIngestor()
     private val edgarIngestor = EdgarTickerMappingIngestor(edgarProperties)
     private val registry = IngestionRegistry(nasdaqIngestor, edgarIngestor)
-    private val tickerReconciliation = EdgarNasdaqTickerReconciliation()
+    private val tickerReconciliation = EdgarNasdaqListingReconciler()
 
     fun run() {
         registry.targets.forEach { ingest(it) }
