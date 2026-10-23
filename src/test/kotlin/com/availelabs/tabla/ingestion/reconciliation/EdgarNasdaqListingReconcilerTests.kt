@@ -16,8 +16,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.time.Instant
 
-class EdgarNasdaqTickerReconciliationTests {
-    private val reconciliation = EdgarNasdaqTickerReconciliation()
+class EdgarNasdaqListingReconcilerTests {
+    private val reconciliation = EdgarNasdaqListingReconciler()
     private val retrievedAt = Instant.parse("2026-10-22T00:00:00Z")
 
     @Test

@@ -1,6 +1,6 @@
 package com.availelabs.tabla.ingestion.snapshot
 
-import com.availelabs.tabla.ingestion.internal.APP_TIME_ZONE
+import com.availelabs.tabla.ingestion.APP_TIME_ZONE
 import com.availelabs.tabla.ingestion.snapshot.dto.SourceSnapshotInput
 import com.availelabs.tabla.ingestion.source.SnapshotSource
 import com.availelabs.tabla.ingestion.source.SourceFile

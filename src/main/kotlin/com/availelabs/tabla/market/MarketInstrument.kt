@@ -7,7 +7,7 @@ import kotlin.uuid.Uuid
 
 sealed interface MarketInstrument {
     val instrumentId: InstrumentId
-    val listing: Sourced<Listing>
+    val securityListing: Sourced<SecurityListing>
     val incomeHistory: HistoricalData<IncomePayment>
 }
 
@@ -26,7 +26,7 @@ data class SecuritySymbols(
     val cqsSymbol: String?
 )
 
-data class Listing private constructor(
+data class SecurityListing private constructor(
     val cik: Int,
     val symbols: SecuritySymbols,
     val name: String,
@@ -38,8 +38,8 @@ data class Listing private constructor(
             symbols: SecuritySymbols,
             name: String,
             exchange: Exchange
-        ): Listing {
-            require(cik > 0) { "CIK must be positive" }
+        ): SecurityListing {
+            require(cik > 0) { "CIK must be a positive integer" }
 
             val normalizedSymbols = symbols.copy(
                 symbol = symbols.symbol.trim().uppercase(),
@@ -52,7 +52,7 @@ data class Listing private constructor(
             val normalizedName = name.trim()
             require(normalizedName.isNotEmpty()) { "Name cannot be empty" }
 
-            return Listing(
+            return SecurityListing(
                 cik = cik,
                 symbols = normalizedSymbols,
                 name = normalizedName,
@@ -64,13 +64,13 @@ data class Listing private constructor(
 
 data class Stock(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
-    override val listing: Sourced<Listing>,
+    override val securityListing: Sourced<SecurityListing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
 
 data class Etf(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
-    override val listing: Sourced<Listing>,
+    override val securityListing: Sourced<SecurityListing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
 
