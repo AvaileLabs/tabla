@@ -9,8 +9,10 @@ import org.jetbrains.kotlinx.dataframe.io.ColType
 import org.jetbrains.kotlinx.dataframe.io.Compression
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.springframework.http.HttpHeaders
+import org.springframework.stereotype.Component
 import kotlin.time.Clock
 
+@Component
 class EdgarIngestor(
     private val properties: EdgarProperties
 ) {
