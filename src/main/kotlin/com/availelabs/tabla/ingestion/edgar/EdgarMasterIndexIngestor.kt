@@ -8,20 +8,15 @@ import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.io.ColType
 import org.jetbrains.kotlinx.dataframe.io.Compression
 import org.jetbrains.kotlinx.dataframe.io.readCsv
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import kotlin.time.Clock
 
 @Component
-class EdgarIngestor(
-    private val properties: EdgarProperties
+class EdgarMasterIndexIngestor(
+    private val edgarClient: EdgarClient
 ) {
-    fun ingest(quarter: EdgarQuarter): Sourced<DataFrame<EdgarMasterIndexEntry>> {
-        val connection = quarter.indexUri.toURL().openConnection().apply {
-            setRequestProperty(HttpHeaders.USER_AGENT, properties.userAgent)
-        }
-
-        return connection.getInputStream().use { input ->
+    fun ingest(quarter: EdgarQuarter): Sourced<DataFrame<EdgarMasterIndexEntry>> =
+        edgarClient.withResponseBody(quarter.indexUri) { input ->
             DataFrame.readCsv(
                 inputStream = input,
                 compression = Compression.Gzip,
@@ -37,5 +32,5 @@ class EdgarIngestor(
             ).cast<EdgarMasterIndexEntry>(verify = true)
                 .sourcedBy(uri = quarter.indexUri, retrievedAt = Clock.System.now(), createdAt = null)
         }
-    }
+
 }

@@ -9,6 +9,7 @@ import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.cast
+import org.jetbrains.kotlinx.dataframe.api.concat
 import org.jetbrains.kotlinx.dataframe.api.dataFrameOf
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import org.junit.jupiter.api.Test
@@ -62,13 +63,69 @@ class EdgarNasdaqListingReconcilerTests {
         assertEquals("Conflicting EDGAR CIKs for ACMEpA: [123456, 654321]", exception.message)
     }
 
-    private fun nasdaq(): Sourced<DataFrame<NasdaqTradedSecurity>> =
+    @Test
+    fun `unmatched securities are omitted and matching rows retain their order`() {
+        val securities = nasdaq(symbol = "OTHER", cqsSymbol = null, nasdaqSymbol = "OTHER").value
+            .concat(
+                nasdaq(symbol = "MISSING", cqsSymbol = null, nasdaqSymbol = "MISSING").value,
+                nasdaq().value,
+                nasdaq().value
+            )
+            .sourcedBy(uri = SourceCatalog.nasdaqDirectory.uri, retrievedAt = retrievedAt)
+
+        val listings = reconciliation.reconcile(
+            securities,
+            edgar(
+                EdgarCompanyTickerMapping(123456, "Acme Holdings", "ACME-A", "NYSE"),
+                EdgarCompanyTickerMapping(654321, "Other Issuer", "OTHER", "NYSE")
+            )
+        )
+
+        assertEquals(listOf("OTHER", "ACMEPA", "ACMEPA"), listings.map { it.symbols.symbol })
+        assertEquals(listOf(654321, 123456, 123456), listings.map { it.cik })
+    }
+
+    @Test
+    fun `ticker matching is case sensitive`() {
+        val listings = reconciliation.reconcile(
+            nasdaq(),
+            edgar(EdgarCompanyTickerMapping(123456, "Acme Holdings", "acme-a", "NYSE"))
+        )
+
+        assertEquals(emptyList(), listings)
+    }
+
+    @Test
+    fun `empty EDGAR data produces no listings`() {
+        assertEquals(emptyList(), reconciliation.reconcile(nasdaq(), edgar()))
+    }
+
+    @Test
+    fun `conflicting CIKs for the same EDGAR ticker are rejected`() {
+        val exception = assertFailsWith<IllegalArgumentException> {
+            reconciliation.reconcile(
+                nasdaq(),
+                edgar(
+                    EdgarCompanyTickerMapping(123456, "Acme Holdings", "ACME-A", "NYSE"),
+                    EdgarCompanyTickerMapping(654321, "Another Issuer", "ACME-A", "Nasdaq")
+                )
+            )
+        }
+
+        assertEquals("Conflicting EDGAR CIKs for ACMEpA: [123456, 654321]", exception.message)
+    }
+
+    private fun nasdaq(
+        symbol: String = "ACMEpA",
+        cqsSymbol: String? = "ACMEpA",
+        nasdaqSymbol: String = "ACME-A"
+    ): Sourced<DataFrame<NasdaqTradedSecurity>> =
         dataFrameOf(
             "Nasdaq Traded", "Symbol", "Security Name", "Listing Exchange", "Market Category", "ETF",
             "Round Lot Size", "Financial Status", "CQS Symbol", "NASDAQ Symbol", "NextShares"
         )(
-            "Y", "ACMEpA", "Acme Preferred Stock", 'N', 'G', 'N',
-            100, 'N', "ACMEpA", "ACME-A", 'N'
+            "Y", symbol, "Acme Preferred Stock", 'N', 'G', 'N',
+            100, 'N', cqsSymbol, nasdaqSymbol, 'N'
         ).cast<NasdaqTradedSecurity>(verify = false)
             .sourcedBy(uri = SourceCatalog.nasdaqDirectory.uri, retrievedAt = retrievedAt)
 

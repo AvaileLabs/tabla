@@ -2,110 +2,91 @@ package com.availelabs.tabla.ingestion.reconciliation
 
 import com.availelabs.tabla.ingestion.edgar.EdgarCompanyTickerMapping
 import com.availelabs.tabla.ingestion.edgar.cik
-import com.availelabs.tabla.ingestion.edgar.name
 import com.availelabs.tabla.ingestion.edgar.ticker
 import com.availelabs.tabla.ingestion.nasdaq.*
 import com.availelabs.tabla.market.Exchange
 import com.availelabs.tabla.market.SecurityListing
 import com.availelabs.tabla.market.SecuritySymbols
 import com.availelabs.tabla.provenance.Sourced
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.*
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
-import org.jetbrains.kotlinx.dataframe.api.innerJoin
-import org.jetbrains.kotlinx.dataframe.api.print
+import org.jetbrains.kotlinx.dataframe.DataRow
 import org.jetbrains.kotlinx.dataframe.api.rows
-import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import org.springframework.stereotype.Component
 
 @Component
 class EdgarNasdaqListingReconciler {
-
     fun reconcile(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
     ): ImmutableList<SecurityListing> {
-        val nasdaqAliases = nasdaq.value.rows()
-            .withIndex()
-            .flatMap { [index, row] ->
-                listOfNotNull(
-                    row.symbol,
-                    row.cqsSymbol,
-                    row.nasdaqSymbol
-                ).distinct().map { alias ->
-                    NasdaqAlias(index, row.symbol, alias)
+        return matchListingsByExactTicker(nasdaq, edgar)
+    }
+
+    fun matchListingsByExactTicker(
+        nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
+        edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
+    ): ImmutableList<SecurityListing> {
+        val ciksByTicker = indexCiksByTicker(edgar.value)
+
+        return nasdaq.value.rows()
+            .mapNotNull { security ->
+                val ciks = findMatchingCiks(security, ciksByTicker)
+
+                when (ciks.size) {
+                    0 -> null
+                    1 -> createListing(security, ciks.single())
+                    else -> error(
+                        "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
+                    )
                 }
             }
-            .toDataFrame()
+            .toPersistentList()
+    }
 
-        val edgarTickers = edgar.value.rows()
-            .withIndex()
-            .map { [index, row] ->
-                EdgarTicker(index, row.ticker, row.cik, row.name)
+    private fun indexCiksByTicker(
+        edgar: DataFrame<EdgarCompanyTickerMapping>
+    ): ImmutableMap<String, ImmutableSet<Int>> =
+        edgar.rows()
+            .groupBy(
+                keySelector = { it.ticker },
+                valueTransform = { it.cik }
+            )
+            .mapValues { it.value.toPersistentSet() }
+            .toPersistentMap()
+
+    private fun findMatchingCiks(
+        security: DataRow<NasdaqTradedSecurity>,
+        ciksByTicker: ImmutableMap<String, ImmutableSet<Int>>
+    ): ImmutableSet<Int> =
+        listOfNotNull(
+            security.symbol,
+            security.cqsSymbol,
+            security.nasdaqSymbol
+        )
+            .flatMap { ciksByTicker[it].orEmpty() }
+            .toPersistentSet()
+
+    private fun createListing(security: DataRow<NasdaqTradedSecurity>, cik: Int): SecurityListing {
+        return SecurityListing.of(
+            cik = cik,
+            symbols = SecuritySymbols(
+                symbol = security.symbol,
+                nasdaqSymbol = security.nasdaqSymbol,
+                cqsSymbol = security.cqsSymbol
+            ),
+            name = security.securityName,
+            exchange = when (val exchangeCode = security.listingExchange) {
+                'Q' -> Exchange.NASDAQ
+                'A' -> Exchange.NYSE_AMERICAN
+                'N' -> Exchange.NYSE
+                'P' -> Exchange.NYSE_ARCA
+                'Z' -> Exchange.CBOE_BZX
+                'V' -> Exchange.IEX
+                'F' -> Exchange.TXSE
+                'M' -> Exchange.NYSE_TEXAS
+                else -> error("Unknown NASDAQ listing exchange '$exchangeCode' for ${security.symbol}")
             }
-            .toDataFrame()
-
-        val matches = nasdaqAliases.innerJoin(edgarTickers) { ticker }
-        matches.print()
-
-        return matches.rows()
-            .groupBy { it.nasdaqRowIndex }
-            .map { [nasdaqRowIndex, tickerMatches] ->
-                val security = nasdaq.value[nasdaqRowIndex]
-                val ciks = tickerMatches.map { it.cik }.distinct()
-                require(ciks.size == 1) {
-                    "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
-                }
-                SecurityListing.of(
-                    cik = ciks.single(),
-                    symbols = SecuritySymbols(
-                        symbol = security.symbol,
-                        nasdaqSymbol = security.nasdaqSymbol,
-                        cqsSymbol = security.cqsSymbol
-                    ),
-                    name = security.securityName,
-                    exchange = when (val code = security.listingExchange) {
-                        'Q' -> Exchange.NASDAQ
-                        'A' -> Exchange.NYSE_AMERICAN
-                        'N' -> Exchange.NYSE
-                        'P' -> Exchange.NYSE_ARCA
-                        'Z' -> Exchange.CBOE_BZX
-                        'V' -> Exchange.IEX
-                        'F' -> Exchange.TXSE
-                        'M' -> Exchange.NYSE_TEXAS
-                        else -> error("Unknown NASDAQ listing exchange '$code' for ${security.symbol}")
-                    }
-                )
-            }
-            .toImmutableList()
+        )
     }
 }
-
-@DataSchema
-data class NasdaqAlias(
-    val nasdaqRowIndex: Int,
-    val nasdaqSymbol: String,
-    val ticker: String
-)
-
-@DataSchema
-data class EdgarTicker(
-    val edgarRowIndex: Int,
-    val ticker: String,
-    val cik: Int,
-    val companyName: String
-)
-
-private data class TickerMatch(
-    val nasdaqSymbol: String,
-    val edgarTicker: String,
-    val edgarCik: Int,
-    val companyName: String,
-    val matchedBy: String
-)
-
-private data class ReconciliationPair(
-    val nasdaqRowIndex: Int,
-    val edgarRowIndex: Int
-)

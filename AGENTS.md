@@ -10,6 +10,8 @@ relevant implementation before proposing changes.
 - Write synchronous Kotlin. Virtual threads are enabled application-wide through Spring Boot configuration.
 - Prefer plain Kotlin over Spring-specific code unless Spring provides a clear benefit.
 - Utilize `kotlinx.collections.immutable` for application-owned collections; confine mutation to implementation details.
+- Prefer declarative, expression-oriented Kotlin over imperative loops and mutable accumulators when it improves code
+  readability.
 
 ## Database migrations
 
