@@ -21,7 +21,6 @@ import org.springframework.stereotype.Repository
 import java.net.URI
 import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Repository
@@ -29,7 +28,6 @@ class SourceSnapshotRepository(
     private val sqlClient: KSqlClient
 ) {
 
-    @OptIn(ExperimentalUuidApi::class)
     fun <T : SourceFile> save(source: SnapshotSource<T>, snapshot: Sourced<T>) {
         require(snapshot.sourceInfo.uri == source.uri) {
             "Snapshot URI ${snapshot.sourceInfo.uri} does not match source URI ${source.uri}"
