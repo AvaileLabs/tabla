@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class SourceSnapshotRetentionJob(
+class SourceSnapshotRetention(
     private val repository: SourceSnapshotRepository
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
