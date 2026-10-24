@@ -1,6 +1,9 @@
 package com.availelabs.tabla.ingestion.edgar
 
-import com.availelabs.tabla.ingestion.source.*
+import com.availelabs.tabla.ingestion.source.EdgarCompanyTickersRawFile
+import com.availelabs.tabla.ingestion.source.EdgarFundTickersRawFile
+import com.availelabs.tabla.ingestion.source.SourceCatalog
+import com.availelabs.tabla.ingestion.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -26,12 +29,13 @@ class EdgarTickerMappingIngestor(
     val companySource = SourceCatalog.edgarCompanyTickers
     val fundSource = SourceCatalog.edgarMutualFundTickers
 
-    fun downloadCompanies(): Sourced<EdgarCompanyTickersRawFile> = download(companySource)
-    fun downloadFunds(): Sourced<EdgarFundTickersRawFile> = download(fundSource)
+    fun downloadCompanies(): Sourced<EdgarCompanyTickersRawFile> =
+        edgarClient.withResponseBody(companySource.uri) { it.readBytes() }
+            .sourcedBy(source = companySource, retrievedAt = Clock.System.now())
 
-    private fun <T : SourceFile> download(source: SnapshotSource<T>): Sourced<T> =
-        edgarClient.withResponseBody(source.uri) { it.readBytes() }
-            .sourcedBy(source = source, retrievedAt = Clock.System.now())
+    fun downloadFunds(): Sourced<EdgarFundTickersRawFile> =
+        edgarClient.withResponseBody(fundSource.uri) { it.readBytes() }
+            .sourcedBy(source = fundSource, retrievedAt = Clock.System.now())
 
     fun ingestCompanies(file: Sourced<EdgarCompanyTickersRawFile>): Sourced<DataFrame<EdgarCompanyTickerMapping>> =
         parseResponse(file.value.bytes)
