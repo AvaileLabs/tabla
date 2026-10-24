@@ -24,9 +24,9 @@ class IngestionPipeline(
 
     fun run() {
         try {
-            ingest(nasdaqIngestor.source, nasdaqIngestor::download)
-            ingest(edgarIngestor.companySource, edgarIngestor::downloadCompanies)
-            ingest(edgarIngestor.fundSource, edgarIngestor::downloadFunds)
+            downloadIfStale(nasdaqIngestor.source, nasdaqIngestor::download)
+            downloadIfStale(edgarIngestor.companySource, edgarIngestor::downloadCompanies)
+            downloadIfStale(edgarIngestor.fundSource, edgarIngestor::downloadFunds)
 
             val rawNasdaq = checkNotNull(repository.latestOf(SourceCatalog.nasdaqDirectory))
             { "NASDAQ snapshot must exist before reconciliation" }
@@ -46,7 +46,7 @@ class IngestionPipeline(
         }
     }
 
-    private fun <T : SourceFile> ingest(source: SnapshotSource<T>, download: () -> Sourced<T>) {
+    private fun <T : SourceFile> downloadIfStale(source: SnapshotSource<T>, download: () -> Sourced<T>) {
         if (repository.wasRetrievedToday(source)) return
 
         val file = download()
