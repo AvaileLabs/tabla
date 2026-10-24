@@ -1,11 +1,6 @@
 package com.availelabs.tabla.ingestion.edgar
 
-import com.availelabs.tabla.ingestion.source.EdgarCompanyTickersRawFile
-import com.availelabs.tabla.ingestion.source.EdgarFundTickersRawFile
-import com.availelabs.tabla.ingestion.source.SnapshotSource
-import com.availelabs.tabla.ingestion.source.SourceCatalog
-import com.availelabs.tabla.ingestion.source.SourceFile
-import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.ingestion.source.*
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -20,14 +15,13 @@ import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
-import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
 @Component
 class EdgarTickerMappingIngestor(
-    private val properties: EdgarProperties
+    private val edgarClient: EdgarClient
 ) {
     val companySource = SourceCatalog.edgarCompanyTickers
     val fundSource = SourceCatalog.edgarMutualFundTickers
@@ -35,14 +29,9 @@ class EdgarTickerMappingIngestor(
     fun downloadCompanies(): Sourced<EdgarCompanyTickersRawFile> = download(companySource)
     fun downloadFunds(): Sourced<EdgarFundTickersRawFile> = download(fundSource)
 
-    private fun <T : SourceFile> download(source: SnapshotSource<T>): Sourced<T> {
-        val connection = source.uri.toURL().openConnection().apply {
-            setRequestProperty(HttpHeaders.USER_AGENT, properties.userAgent)
-        }
-
-        val bytes = connection.getInputStream().use { it.readBytes() }
-        return bytes.sourcedBy(source = source, retrievedAt = Clock.System.now())
-    }
+    private fun <T : SourceFile> download(source: SnapshotSource<T>): Sourced<T> =
+        edgarClient.withResponseBody(source.uri) { it.readBytes() }
+            .sourcedBy(source = source, retrievedAt = Clock.System.now())
 
     fun ingestCompanies(file: Sourced<EdgarCompanyTickersRawFile>): Sourced<DataFrame<EdgarCompanyTickerMapping>> =
         parseResponse(file.value.bytes)
