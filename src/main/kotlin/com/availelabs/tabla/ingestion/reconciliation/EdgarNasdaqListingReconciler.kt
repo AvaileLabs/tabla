@@ -17,7 +17,9 @@ import org.jetbrains.kotlinx.dataframe.api.innerJoin
 import org.jetbrains.kotlinx.dataframe.api.print
 import org.jetbrains.kotlinx.dataframe.api.rows
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
+import org.springframework.stereotype.Component
 
+@Component
 class EdgarNasdaqListingReconciler {
 
     fun reconcile(

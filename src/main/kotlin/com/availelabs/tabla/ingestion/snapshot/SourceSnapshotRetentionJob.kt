@@ -3,7 +3,9 @@ package com.availelabs.tabla.ingestion.snapshot
 import com.availelabs.tabla.ingestion.source.SourceCatalog
 import kotlinx.collections.immutable.persistentHashMapOf
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 
+@Component
 class SourceSnapshotRetentionJob(
     private val repository: SourceSnapshotRepository
 ) {

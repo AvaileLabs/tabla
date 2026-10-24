@@ -21,9 +21,11 @@ import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import org.springframework.http.HttpHeaders
+import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
+@Component
 class EdgarTickerMappingIngestor(
     private val properties: EdgarProperties
 ) {

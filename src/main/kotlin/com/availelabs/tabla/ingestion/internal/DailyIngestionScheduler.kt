@@ -5,13 +5,18 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.todayIn
+import org.springframework.scheduling.TaskScheduler
+import org.springframework.stereotype.Component
 import java.security.SecureRandom
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
+@Component
 class DailyIngestionScheduler(
-    private val scheduleRun: (Instant) -> Unit
+    private val pipeline: IngestionPipeline,
+    @Suppress("SpringJavaInjectionPointsAutowiringInspection")
+    private val taskScheduler: TaskScheduler
 ) {
     private val random = SecureRandom()
 
@@ -23,6 +28,6 @@ class DailyIngestionScheduler(
         val scheduledAt = start +
                 random.nextLong((end - start).inWholeMilliseconds).milliseconds
 
-        scheduleRun(scheduledAt)
+        taskScheduler.schedule(pipeline::run, scheduledAt.toJavaInstant())
     }
 }

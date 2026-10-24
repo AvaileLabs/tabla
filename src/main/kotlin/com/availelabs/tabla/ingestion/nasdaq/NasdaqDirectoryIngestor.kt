@@ -11,9 +11,11 @@ import kotlinx.datetime.format.char
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
+import org.springframework.stereotype.Component
 import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
+@Component
 class NasdaqDirectoryIngestor {
     val source = SourceCatalog.nasdaqDirectory
 
