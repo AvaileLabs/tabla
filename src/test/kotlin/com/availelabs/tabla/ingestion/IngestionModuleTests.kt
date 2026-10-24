@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.*
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.DefaultApplicationArguments
 import org.springframework.context.annotation.Import
 import org.springframework.modulith.test.ApplicationModuleTest
 import org.springframework.scheduling.TaskScheduler
@@ -27,6 +28,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.transaction.annotation.Transactional
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -104,11 +107,59 @@ class IngestionModuleTests {
     }
 
     @Test
+    fun `startup reuses today's persisted snapshots without downloading again`() {
+        val now = Clock.System.now()
+        repository.save(SourceCatalog.nasdaqDirectory, nasdaqContent.sourcedBy(SourceCatalog.nasdaqDirectory, now))
+        repository.save(
+            SourceCatalog.edgarCompanyTickers,
+            companyContent.sourcedBy(SourceCatalog.edgarCompanyTickers, now)
+        )
+        repository.save(
+            SourceCatalog.edgarMutualFundTickers,
+            fundContent.sourcedBy(SourceCatalog.edgarMutualFundTickers, now)
+        )
+
+        ApplicationLifecycle(jobs).run(DefaultApplicationArguments())
+
+        verify(nasdaq, never()).download()
+        verify(edgar, never()).downloadCompanies()
+        verify(edgar, never()).downloadFunds()
+        assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent)
+        assertSnapshot(SourceCatalog.edgarCompanyTickers, companyContent)
+        assertSnapshot(SourceCatalog.edgarMutualFundTickers, fundContent)
+    }
+
+    @Test
+    fun `startup downloads only stale or missing sources`() {
+        val now = Clock.System.now()
+        repository.save(SourceCatalog.nasdaqDirectory, nasdaqContent.sourcedBy(SourceCatalog.nasdaqDirectory, now))
+        repository.save(
+            SourceCatalog.edgarCompanyTickers,
+            companyContent.sourcedBy(
+                SourceCatalog.edgarCompanyTickers,
+                Clock.System.todayIn(APP_TIME_ZONE).atStartOfDayIn(APP_TIME_ZONE) - 1.days
+            )
+        )
+
+        ApplicationLifecycle(jobs).run(DefaultApplicationArguments())
+
+        verify(nasdaq, never()).download()
+        verify(edgar).downloadCompanies()
+        verify(edgar).downloadFunds()
+        assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent)
+        assertSnapshot(SourceCatalog.edgarCompanyTickers, companyContent, count = 2)
+        assertSnapshot(SourceCatalog.edgarMutualFundTickers, fundContent)
+    }
+
+    @Test
     fun `schedules the same pipeline between midnight and five in New York`() {
+        saveHistory(SourceCatalog.nasdaqDirectory, 365)
+        saveHistory(SourceCatalog.edgarCompanyTickers, 10)
+        saveHistory(SourceCatalog.edgarMutualFundTickers, 10)
         doReturn(null).`when`(taskScheduler).schedule(any(Runnable::class.java), any(JavaInstant::class.java))
         val today = Clock.System.todayIn(APP_TIME_ZONE)
 
-        jobs.scheduleIngestionForToday()
+        ApplicationLifecycle(jobs).runDailyTasks()
 
         val task = ArgumentCaptor.forClass(Runnable::class.java)
         val scheduledAt = ArgumentCaptor.forClass(JavaInstant::class.java)
@@ -121,22 +172,60 @@ class IngestionModuleTests {
 
         task.value.run()
 
+        assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent, count = 365)
+        assertSnapshot(SourceCatalog.edgarCompanyTickers, companyContent, count = 10)
+        assertSnapshot(SourceCatalog.edgarMutualFundTickers, fundContent, count = 10)
+    }
+
+    @Test
+    fun `ingestion retains the newest snapshots after downloading according to each source policy`() {
+        saveHistory(SourceCatalog.nasdaqDirectory, 367)
+        saveHistory(SourceCatalog.edgarCompanyTickers, 12)
+        saveHistory(SourceCatalog.edgarMutualFundTickers, 12)
+
+        ApplicationLifecycle(jobs).run(DefaultApplicationArguments())
+
+        assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent, count = 365)
+        assertSnapshot(SourceCatalog.edgarCompanyTickers, companyContent, count = 10)
+        assertSnapshot(SourceCatalog.edgarMutualFundTickers, fundContent, count = 10)
+    }
+
+    @Test
+    fun `retention failure does not prevent snapshot processing`() {
+        doThrow(IllegalStateException("Cleanup unavailable")).`when`(repository).sourceUris()
+
+        jobs.ingestNow()
+
+        verify(repository).latestOf(SourceCatalog.nasdaqDirectory)
+        verify(repository).latestOf(SourceCatalog.edgarCompanyTickers)
+        verify(repository).sourceUris()
         assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent)
         assertSnapshot(SourceCatalog.edgarCompanyTickers, companyContent)
         assertSnapshot(SourceCatalog.edgarMutualFundTickers, fundContent)
     }
 
     @Test
-    fun `retention keeps the newest snapshots according to each source policy`() {
-        saveHistory(SourceCatalog.nasdaqDirectory, 367)
-        saveHistory(SourceCatalog.edgarCompanyTickers, 12)
-        saveHistory(SourceCatalog.edgarMutualFundTickers, 12)
+    fun `retention still runs after a download fails`() {
+        saveHistory(SourceCatalog.nasdaqDirectory, 365)
+        val downloadFailure = IllegalStateException("SEC unavailable")
+        doThrow(downloadFailure).`when`(edgar).downloadCompanies()
 
-        jobs.retainSnapshots()
+        val failure = assertFailsWith<IllegalStateException> { jobs.ingestNow() }
 
-        assertSnapshot(SourceCatalog.nasdaqDirectory, "snapshot 366".encodeToByteArray(), count = 365)
-        assertSnapshot(SourceCatalog.edgarCompanyTickers, "snapshot 11".encodeToByteArray(), count = 10)
-        assertSnapshot(SourceCatalog.edgarMutualFundTickers, "snapshot 11".encodeToByteArray(), count = 10)
+        assertSame(downloadFailure, failure)
+        assertSnapshot(SourceCatalog.nasdaqDirectory, nasdaqContent, count = 365)
+    }
+
+    @Test
+    fun `retention failure does not hide a download failure`() {
+        val downloadFailure = IllegalStateException("SEC unavailable")
+        doThrow(downloadFailure).`when`(edgar).downloadCompanies()
+        doThrow(IllegalStateException("Cleanup unavailable")).`when`(repository).sourceUris()
+
+        val failure = assertFailsWith<IllegalStateException> { jobs.ingestNow() }
+
+        assertSame(downloadFailure, failure)
+        verify(repository).sourceUris()
     }
 
     private fun <T : SourceFile> saveHistory(source: SnapshotSource<T>, count: Int) {

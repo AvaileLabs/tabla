@@ -25,13 +25,11 @@ class ApplicationLifecycle(
     private val ingestion: IngestionJobs
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        ingestion.retainSnapshots()
         ingestion.ingestNow()
     }
 
     @Scheduled(cron = "@daily", zone = APP_TIME_ZONE_ID)
     fun runDailyTasks() {
         ingestion.scheduleIngestionForToday()
-        ingestion.retainSnapshots()
     }
 }
