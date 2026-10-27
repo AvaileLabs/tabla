@@ -5,7 +5,7 @@ import com.availelabs.tabla.ingestion.internal.IngestionPipeline
 import org.springframework.stereotype.Service
 
 @Service
-class IngestionJobs internal constructor(
+class IngestionJobs(
     private val pipeline: IngestionPipeline,
     private val dailyIngestion: DailyIngestionScheduler
 ) {

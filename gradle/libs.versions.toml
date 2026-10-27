@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.5.0-Beta2"
-springBoot = "4.2.0-M2"
-springAi = "2.1.0-M1"
-springModulith = "2.2.0-M2"
+springBoot = "4.2.0-RC1"
+springAi = "2.1.0-RC1"
+springModulith = "2.2.0-RC1"
 dataframe = "1.0.0-rc02"
 datetime = "0.8.0"
 jimmer = "0.12.4"

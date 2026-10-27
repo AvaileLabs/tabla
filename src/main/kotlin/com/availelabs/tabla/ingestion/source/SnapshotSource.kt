@@ -8,7 +8,7 @@ interface SourceFile {
 }
 
 /** Binds a raw document type to the URI used to download and store it. */
-class SnapshotSource<T : SourceFile> internal constructor(
+class SnapshotSource<T : SourceFile>(
     val uri: URI,
-    internal val wrap: (ByteArray) -> T
+    val wrap: (ByteArray) -> T
 )

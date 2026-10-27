@@ -26,6 +26,7 @@ dependencies {
     implementation(platform(libs.springAi.bom))
     implementation(platform(libs.springModulith.bom))
     kapt(platform(libs.springBoot.bom))
+    developmentOnly(platform(libs.springBoot.bom))
 
     implementation(libs.springBoot.starter)
     implementation(libs.springBoot.starterRestClient)
