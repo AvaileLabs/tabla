@@ -2,7 +2,6 @@ package com.availelabs.tabla.market
 
 import com.availelabs.tabla.provenance.HistoricalData
 import com.availelabs.tabla.provenance.Sourced
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 sealed interface MarketInstrument {
@@ -14,7 +13,6 @@ sealed interface MarketInstrument {
 @JvmInline
 value class InstrumentId(val value: Uuid) {
     companion object {
-        @OptIn(ExperimentalUuidApi::class)
         fun generate(): InstrumentId =
             InstrumentId(Uuid.generateV7())
     }
@@ -23,7 +21,8 @@ value class InstrumentId(val value: Uuid) {
 data class SecuritySymbols(
     val symbol: String,
     val nasdaqSymbol: String,
-    val cqsSymbol: String?
+    val cqsSymbol: String?,
+    val edgarSymbol: String
 )
 
 data class SecurityListing private constructor(

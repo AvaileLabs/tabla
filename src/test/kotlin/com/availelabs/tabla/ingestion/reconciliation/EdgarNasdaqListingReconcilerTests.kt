@@ -22,7 +22,7 @@ class EdgarNasdaqListingReconcilerTests {
     private val retrievedAt = Instant.parse("2026-10-22T00:00:00Z")
 
     @Test
-    fun `uses NASDAQ listing details and EDGAR CIK when exchanges disagree`() {
+    fun `uses NASDAQ listing details and EDGAR CIK and ticker when exchanges disagree`() {
         val listings = reconciliation.reconcile(
             nasdaq(),
             edgar(EdgarCompanyTickerMapping(123456, "Acme Holdings", "ACME-A", "Nasdaq"))
@@ -32,7 +32,7 @@ class EdgarNasdaqListingReconcilerTests {
         assertEquals(123456, listing.cik)
         assertEquals(Exchange.NYSE, listing.exchange)
         assertEquals("Acme Preferred Stock", listing.name)
-        assertEquals(SecuritySymbols("ACMEPA", "ACME-A", "ACMEpA"), listing.symbols)
+        assertEquals(SecuritySymbols("ACMEPA", "ACME-A", "ACMEpA", "ACME-A"), listing.symbols)
     }
 
     @Test
@@ -46,11 +46,22 @@ class EdgarNasdaqListingReconcilerTests {
         )
 
         assertEquals(123456, listings.single().cik)
+        assertEquals("ACMEpA", listings.single().symbols.edgarSymbol)
+    }
+
+    @Test
+    fun `EDGAR ticker can match only the CQS symbol`() {
+        val listings = reconciliation.reconcile(
+            nasdaq(symbol = "ACME"),
+            edgar(EdgarCompanyTickerMapping(123456, "Acme Holdings", "ACMEpA", "NYSE"))
+        )
+
+        assertEquals(SecuritySymbols("ACME", "ACME-A", "ACMEpA", "ACMEpA"), listings.single().symbols)
     }
 
     @Test
     fun `conflicting CIKs for the same security are rejected`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<IllegalStateException> {
             reconciliation.reconcile(
                 nasdaq(),
                 edgar(
@@ -82,6 +93,7 @@ class EdgarNasdaqListingReconcilerTests {
         )
 
         assertEquals(listOf("OTHER", "ACMEPA", "ACMEPA"), listings.map { it.symbols.symbol })
+        assertEquals(listOf("OTHER", "ACME-A", "ACME-A"), listings.map { it.symbols.edgarSymbol })
         assertEquals(listOf(654321, 123456, 123456), listings.map { it.cik })
     }
 
@@ -102,7 +114,7 @@ class EdgarNasdaqListingReconcilerTests {
 
     @Test
     fun `conflicting CIKs for the same EDGAR ticker are rejected`() {
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertFailsWith<IllegalStateException> {
             reconciliation.reconcile(
                 nasdaq(),
                 edgar(

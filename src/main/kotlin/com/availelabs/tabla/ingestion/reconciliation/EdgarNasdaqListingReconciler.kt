@@ -20,22 +20,26 @@ class EdgarNasdaqListingReconciler {
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
     ): ImmutableList<SecurityListing> {
+        val matches = matchListingsByExactTicker(nasdaq, edgar)
+        println(matches)
+
         return matchListingsByExactTicker(nasdaq, edgar)
     }
 
-    fun matchListingsByExactTicker(
+    private fun matchListingsByExactTicker(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
     ): ImmutableList<SecurityListing> {
-        val ciksByTicker = indexCiksByTicker(edgar.value)
+        val mappingsByTicker = indexMappingsByTicker(edgar.value)
 
         return nasdaq.value.rows()
             .mapNotNull { security ->
-                val ciks = findMatchingCiks(security, ciksByTicker)
+                val matches = findMatchingMappings(security, mappingsByTicker)
+                val ciks = matches.map { it.cik }.toPersistentSet()
 
                 when (ciks.size) {
                     0 -> null
-                    1 -> createListing(security, ciks.single())
+                    1 -> createListing(security, matches.first())
                     else -> error(
                         "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
                     )
@@ -44,36 +48,37 @@ class EdgarNasdaqListingReconciler {
             .toPersistentList()
     }
 
-    private fun indexCiksByTicker(
+    private fun indexMappingsByTicker(
         edgar: DataFrame<EdgarCompanyTickerMapping>
-    ): ImmutableMap<String, ImmutableSet<Int>> =
+    ): ImmutableMap<String, ImmutableList<DataRow<EdgarCompanyTickerMapping>>> =
         edgar.rows()
-            .groupBy(
-                keySelector = { it.ticker },
-                valueTransform = { it.cik }
-            )
-            .mapValues { it.value.toPersistentSet() }
+            .groupBy { it.ticker }
+            .mapValues { it.value.toPersistentList() }
             .toPersistentMap()
 
-    private fun findMatchingCiks(
+    private fun findMatchingMappings(
         security: DataRow<NasdaqTradedSecurity>,
-        ciksByTicker: ImmutableMap<String, ImmutableSet<Int>>
-    ): ImmutableSet<Int> =
+        mappingsByTicker: ImmutableMap<String, ImmutableList<DataRow<EdgarCompanyTickerMapping>>>
+    ): ImmutableList<DataRow<EdgarCompanyTickerMapping>> =
         listOfNotNull(
             security.symbol,
             security.cqsSymbol,
             security.nasdaqSymbol
         )
-            .flatMap { ciksByTicker[it].orEmpty() }
-            .toPersistentSet()
+            .flatMap { mappingsByTicker[it].orEmpty() }
+            .toPersistentList()
 
-    private fun createListing(security: DataRow<NasdaqTradedSecurity>, cik: Int): SecurityListing {
+    private fun createListing(
+        security: DataRow<NasdaqTradedSecurity>,
+        edgar: DataRow<EdgarCompanyTickerMapping>
+    ): SecurityListing {
         return SecurityListing.of(
-            cik = cik,
+            cik = edgar.cik,
             symbols = SecuritySymbols(
                 symbol = security.symbol,
                 nasdaqSymbol = security.nasdaqSymbol,
-                cqsSymbol = security.cqsSymbol
+                cqsSymbol = security.cqsSymbol,
+                edgarSymbol = edgar.ticker
             ),
             name = security.securityName,
             exchange = when (val exchangeCode = security.listingExchange) {

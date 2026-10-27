@@ -1,16 +1,16 @@
 package com.availelabs.tabla.ingestion.source
 
 @JvmInline
-value class EdgarCompanyTickersRawFile internal constructor(
+value class EdgarCompanyTickersRawFile(
     override val bytes: ByteArray
 ) : SourceFile
 
 @JvmInline
-value class EdgarFundTickersRawFile internal constructor(
+value class EdgarFundTickersRawFile(
     override val bytes: ByteArray
 ) : SourceFile
 
 @JvmInline
-value class NasdaqDirectoryRawFile internal constructor(
+value class NasdaqDirectoryRawFile(
     override val bytes: ByteArray
 ) : SourceFile
