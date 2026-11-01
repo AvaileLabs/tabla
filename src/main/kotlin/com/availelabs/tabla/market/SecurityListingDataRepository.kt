@@ -16,7 +16,7 @@ class SecurityListingDataRepository(
 ) {
     @Transactional
     fun saveAll(
-        securityListings: ImmutableList<SecurityListingData>
+        securityListings: ImmutableList<SecurityListing>
     ) {
         if (securityListings.isEmpty()) return
 
