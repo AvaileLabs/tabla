@@ -5,7 +5,7 @@ import com.availelabs.tabla.ingestion.edgar.cik
 import com.availelabs.tabla.ingestion.edgar.ticker
 import com.availelabs.tabla.ingestion.nasdaq.*
 import com.availelabs.tabla.market.Exchange
-import com.availelabs.tabla.market.SecurityListingData
+import com.availelabs.tabla.market.SecurityListing
 import com.availelabs.tabla.market.SecuritySymbols
 import com.availelabs.tabla.provenance.Sourced
 import kotlinx.collections.immutable.*
@@ -19,13 +19,13 @@ class EdgarNasdaqListingReconciler {
     fun reconcile(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ): ImmutableList<SecurityListingData> =
+    ): ImmutableList<SecurityListing> =
         matchListingsByExactTicker(nasdaq, edgar)
 
     private fun matchListingsByExactTicker(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ): ImmutableList<SecurityListingData> {
+    ): ImmutableList<SecurityListing> {
         val mappingsByTicker = indexMappingsByTicker(edgar.value)
 
         return nasdaq.value.rows()
@@ -67,8 +67,8 @@ class EdgarNasdaqListingReconciler {
     private fun toListingData(
         security: DataRow<NasdaqTradedSecurity>,
         edgar: DataRow<EdgarCompanyTickerMapping>
-    ): SecurityListingData =
-        SecurityListingData.of(
+    ): SecurityListing =
+        SecurityListing.of(
             cik = edgar.cik,
             symbols = SecuritySymbols.of(
                 symbol = security.symbol,
