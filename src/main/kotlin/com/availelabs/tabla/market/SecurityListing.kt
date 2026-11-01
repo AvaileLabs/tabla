@@ -1,7 +1,5 @@
 package com.availelabs.tabla.market
 
-import kotlin.uuid.Uuid
-
 data class SecurityListing private constructor(
     val cik: Int,
     val symbols: SecuritySymbols,
@@ -28,17 +26,6 @@ data class SecurityListing private constructor(
                 name = name.trim(),
                 exchange = exchange
             )
-    }
-}
-
-@JvmInline
-value class SecurityListingId private constructor(val value: Uuid) {
-    companion object {
-        fun generate(): SecurityListingId =
-            SecurityListingId(Uuid.generateV7())
-
-        fun from(value: Uuid): SecurityListingId =
-            SecurityListingId(value)
     }
 }
 
