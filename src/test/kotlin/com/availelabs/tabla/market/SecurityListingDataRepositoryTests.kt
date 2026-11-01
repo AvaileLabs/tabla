@@ -18,9 +18,9 @@ import kotlin.test.assertEquals
 @Import(PostgresTestConfiguration::class)
 @TestPropertySource(properties = ["tabla.edgar.user-agent=Tabla tests test@example.com"])
 @Transactional
-class SecurityListingRepositoryTests {
+class SecurityListingDataRepositoryTests {
     @Autowired
-    private lateinit var repository: SecurityListingRepository
+    private lateinit var repository: SecurityListingDataRepository
 
     @Autowired
     private lateinit var sqlClient: KSqlClient
@@ -37,7 +37,7 @@ class SecurityListingRepositoryTests {
             exchange = Exchange.NYSE
         )
 
-        repository.save(persistentListOf(listing))
+        repository.saveAll(persistentListOf(listing))
 
         val saved = sqlClient.createQuery(SecurityListingEntity::class) {
             select(table)

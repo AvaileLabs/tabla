@@ -16,5 +16,6 @@ interface SecurityListingEntity {
     val nasdaqSymbol: String
     val cqsSymbol: String?
     val edgarSymbol: String
+    val name: String
     val exchange: Exchange
 }

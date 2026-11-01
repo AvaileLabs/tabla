@@ -8,6 +8,7 @@ import com.availelabs.tabla.ingestion.snapshot.SourceSnapshotRetention
 import com.availelabs.tabla.ingestion.source.SnapshotSource
 import com.availelabs.tabla.ingestion.source.SourceCatalog
 import com.availelabs.tabla.ingestion.source.SourceFile
+import com.availelabs.tabla.market.SecurityListingDataRepository
 import com.availelabs.tabla.provenance.Sourced
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,7 +19,8 @@ class IngestionPipeline(
     private val retention: SourceSnapshotRetention,
     private val nasdaqIngestor: NasdaqDirectoryIngestor,
     private val edgarIngestor: EdgarTickerMappingIngestor,
-    private val tickerReconciliation: EdgarNasdaqListingReconciler
+    private val tickerReconciliation: EdgarNasdaqListingReconciler,
+    private val securityListingDataRepository: SecurityListingDataRepository
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -36,7 +38,8 @@ class IngestionPipeline(
             val nasdaq = nasdaqIngestor.parse(rawNasdaq)
             val edgar = edgarIngestor.ingestCompanies(rawEdgar)
 
-            val _ = tickerReconciliation.reconcile(nasdaq, edgar)
+            val listings = tickerReconciliation.reconcile(nasdaq, edgar)
+//            val _ = securityListingRepository.save(listings)
         } finally {
             try {
                 retention.run()

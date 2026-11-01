@@ -5,7 +5,7 @@ import com.availelabs.tabla.ingestion.edgar.cik
 import com.availelabs.tabla.ingestion.edgar.ticker
 import com.availelabs.tabla.ingestion.nasdaq.*
 import com.availelabs.tabla.market.Exchange
-import com.availelabs.tabla.market.SecurityListing
+import com.availelabs.tabla.market.SecurityListingData
 import com.availelabs.tabla.market.SecuritySymbols
 import com.availelabs.tabla.provenance.Sourced
 import kotlinx.collections.immutable.*
@@ -19,17 +19,13 @@ class EdgarNasdaqListingReconciler {
     fun reconcile(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ): ImmutableList<SecurityListing> {
-        val matches = matchListingsByExactTicker(nasdaq, edgar)
-        println(matches)
-
-        return matchListingsByExactTicker(nasdaq, edgar)
-    }
+    ): ImmutableList<SecurityListingData> =
+        matchListingsByExactTicker(nasdaq, edgar)
 
     private fun matchListingsByExactTicker(
         nasdaq: Sourced<DataFrame<NasdaqTradedSecurity>>,
         edgar: Sourced<DataFrame<EdgarCompanyTickerMapping>>
-    ): ImmutableList<SecurityListing> {
+    ): ImmutableList<SecurityListingData> {
         val mappingsByTicker = indexMappingsByTicker(edgar.value)
 
         return nasdaq.value.rows()
@@ -39,7 +35,7 @@ class EdgarNasdaqListingReconciler {
 
                 when (ciks.size) {
                     0 -> null
-                    1 -> createListing(security, matches.first())
+                    1 -> toListingData(security, matches.first())
                     else -> error(
                         "Conflicting EDGAR CIKs for ${security.symbol}: $ciks"
                     )
@@ -68,13 +64,13 @@ class EdgarNasdaqListingReconciler {
             .flatMap { mappingsByTicker[it].orEmpty() }
             .toPersistentList()
 
-    private fun createListing(
+    private fun toListingData(
         security: DataRow<NasdaqTradedSecurity>,
         edgar: DataRow<EdgarCompanyTickerMapping>
-    ): SecurityListing {
-        return SecurityListing.of(
+    ): SecurityListingData =
+        SecurityListingData.of(
             cik = edgar.cik,
-            symbols = SecuritySymbols(
+            symbols = SecuritySymbols.of(
                 symbol = security.symbol,
                 nasdaqSymbol = security.nasdaqSymbol,
                 cqsSymbol = security.cqsSymbol,
@@ -90,8 +86,9 @@ class EdgarNasdaqListingReconciler {
                 'V' -> Exchange.IEX
                 'F' -> Exchange.TXSE
                 'M' -> Exchange.NYSE_TEXAS
-                else -> error("Unknown NASDAQ listing exchange '$exchangeCode' for ${security.symbol}")
+                else -> error(
+                    "Unknown NASDAQ listing exchange '$exchangeCode' for ${security.symbol}"
+                )
             }
         )
-    }
 }
