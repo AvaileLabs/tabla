@@ -6,7 +6,6 @@ relevant implementation before proposing changes.
 
 ## General
 
-- Discover and use relevant IntelliJ IDEA agent skills and tools when available.
 - Write synchronous Kotlin. Virtual threads are enabled application-wide through Spring Boot configuration.
 - Prefer plain Kotlin over Spring-specific code unless Spring provides a clear benefit.
 - Utilize `kotlinx.collections.immutable` for application-owned collections; confine mutation to implementation details.
@@ -23,6 +22,10 @@ relevant implementation before proposing changes.
 
 ## Agent-specific workflow
 
+- Discover and use relevant IntelliJ IDEA agent skills and tools when available. If IntelliJ IDEA's MCP server is
+  unavailable, ask the user to enable it.
+- Reuse the JDK provisioned for this project's Gradle toolchain under `GRADLE_USER_HOME/jdks`
+  (default `~/.gradle/jdks`). Set `JAVA_HOME` for individual commands when needed.
 - Use Git commands for tracked file operations, including `git mv` for moves or renames and `git rm` for deletions.
 - Do not modify README.md unless explicitly requested.
 - Use KDoc only for API documentation, not for implementation details.

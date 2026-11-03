@@ -22,37 +22,44 @@ java {
 }
 
 dependencies {
+    // Dependency management (BOMs)
     implementation(platform(libs.springBoot.bom))
     implementation(platform(libs.springAi.bom))
     implementation(platform(libs.springModulith.bom))
     kapt(platform(libs.springBoot.bom))
     developmentOnly(platform(libs.springBoot.bom))
 
+    // Spring Boot
     implementation(libs.springBoot.starter)
     implementation(libs.springBoot.starterRestClient)
     implementation(libs.springBoot.starterActuator)
     implementation(libs.springAi.starterMcpServerWebmvc)
-    implementation(libs.kotlin.reflect)
     implementation(libs.springModulith.starterCore)
     runtimeOnly(libs.springModulith.runtime)
-    implementation(libs.kotlinx.dataframe)
-    implementation(libs.kotlinx.datetime)
+    kapt(libs.springBoot.configurationProcessor)
+    developmentOnly(libs.springBoot.dockerCompose)
+
+    // Kotlin
+    implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.dataframe)
+
+    // Persistence and database migrations
     implementation(libs.jimmer.springBootStarter)
+    implementation(libs.springBoot.starterFlyway)
     ksp(libs.jimmer.ksp)
     runtimeOnly(libs.postgresql)
-    implementation(libs.springBoot.starterFlyway)
     runtimeOnly(libs.flyway.postgresql)
-    kapt(libs.springBoot.configurationProcessor)
-    implementation(libs.kotlinx.serialization.json)
 
+    // Testing
     testImplementation(libs.springBoot.starterTest)
     testImplementation(libs.kotlin.testJunit5)
     testImplementation(libs.springModulith.starterTest)
-    developmentOnly(libs.springBoot.dockerCompose)
-    testRuntimeOnly(libs.junit.platformLauncher)
     testImplementation(libs.springBoot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
+    testRuntimeOnly(libs.junit.platformLauncher)
 }
 
 kotlin {
