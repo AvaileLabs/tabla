@@ -39,7 +39,7 @@ class IngestionPipeline(
             val edgar = edgarIngestor.ingestCompanies(rawEdgar)
 
             val listings = tickerReconciliation.reconcile(nasdaq, edgar)
-//            val _ = securityListingRepository.save(listings)
+//            securityListingDataRepository.saveAll(listings)
         } finally {
             try {
                 retention.run()
