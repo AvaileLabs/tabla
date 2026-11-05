@@ -42,6 +42,7 @@ dependencies {
     // Kotlin
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.io.core)
     implementation(libs.kotlinx.io.bytestring)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)

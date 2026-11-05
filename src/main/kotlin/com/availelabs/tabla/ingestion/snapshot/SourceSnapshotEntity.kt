@@ -1,5 +1,6 @@
 package com.availelabs.tabla.ingestion.snapshot
 
+import kotlinx.io.bytestring.ByteString
 import org.babyfish.jimmer.sql.Entity
 import org.babyfish.jimmer.sql.Id
 import org.babyfish.jimmer.sql.Table
@@ -14,5 +15,5 @@ interface SourceSnapshotEntity {
     val id: Uuid
     val sourceUri: URI
     val retrievedAt: Instant
-    val content: ByteArray
+    val content: ByteString
 }
