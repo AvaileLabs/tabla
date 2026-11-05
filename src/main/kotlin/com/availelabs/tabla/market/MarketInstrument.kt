@@ -11,7 +11,7 @@ sealed interface MarketInstrument {
 }
 
 value class InstrumentId(val value: Uuid) {
-    companion object {
+    companion {
         fun generate(): InstrumentId =
             InstrumentId(Uuid.generateV7())
     }

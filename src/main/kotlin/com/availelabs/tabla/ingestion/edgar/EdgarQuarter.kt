@@ -9,7 +9,7 @@ enum class CalendarQuarter(val number: Int) {
     Q3(3),
     Q4(4);
 
-    companion object {
+    companion {
         fun fromMonth(month: Month): CalendarQuarter =
             entries[month.ordinal / 3]
     }
