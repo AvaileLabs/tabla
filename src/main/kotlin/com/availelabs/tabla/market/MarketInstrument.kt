@@ -10,7 +10,6 @@ sealed interface MarketInstrument {
     val incomeHistory: HistoricalData<IncomePayment>
 }
 
-@JvmInline
 value class InstrumentId(val value: Uuid) {
     companion object {
         fun generate(): InstrumentId =
@@ -18,13 +17,13 @@ value class InstrumentId(val value: Uuid) {
     }
 }
 
-data class Stock(
+value class Stock(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
     override val securityListing: Sourced<SecurityListing>,
     override val incomeHistory: HistoricalData<IncomePayment>,
 ) : MarketInstrument
 
-data class Etf(
+value class Etf(
     override val instrumentId: InstrumentId = InstrumentId.generate(),
     override val securityListing: Sourced<SecurityListing>,
     override val incomeHistory: HistoricalData<IncomePayment>,

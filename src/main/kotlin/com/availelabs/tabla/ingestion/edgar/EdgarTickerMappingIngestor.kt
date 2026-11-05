@@ -6,6 +6,7 @@ import com.availelabs.tabla.ingestion.source.SourceCatalog
 import com.availelabs.tabla.ingestion.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
+import kotlinx.io.bytestring.ByteString
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -52,8 +53,8 @@ class EdgarTickerMappingIngestor(
             .sourcedBy(uri = file.sourceInfo.uri, retrievedAt = file.sourceInfo.retrievedAt)
 
     @OptIn(ExperimentalSerializationApi::class)
-    private fun parseResponse(snapshot: ByteArray): SecTickerResponse =
-        ByteArrayInputStream(snapshot).use {
+    private fun parseResponse(snapshot: ByteString): SecTickerResponse =
+        ByteArrayInputStream(snapshot.toByteArray()).use {
             Json.decodeFromStream<SecTickerResponse>(it)
         }
 }
@@ -81,7 +82,7 @@ private fun <T : Any> SecTickerResponse.decodeRows(
 
 @Serializable
 @DataSchema
-data class EdgarCompanyTickerMapping(
+value class EdgarCompanyTickerMapping(
     val cik: Int,
     val name: String,
     val ticker: String,
@@ -90,7 +91,7 @@ data class EdgarCompanyTickerMapping(
 
 @Serializable
 @DataSchema
-data class EdgarMutualFundTickerMapping(
+value class EdgarMutualFundTickerMapping(
     val cik: Int,
     val seriesId: String,
     val classId: String,
@@ -98,7 +99,7 @@ data class EdgarMutualFundTickerMapping(
 )
 
 @Serializable
-private data class SecTickerResponse(
+private value class SecTickerResponse(
     val fields: List<String>,
     val data: List<List<JsonElement>>
 )

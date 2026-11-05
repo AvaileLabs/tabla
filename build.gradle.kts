@@ -42,6 +42,7 @@ dependencies {
     // Kotlin
     implementation(libs.kotlin.reflect)
     implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.io.bytestring)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.dataframe)
@@ -70,6 +71,7 @@ kotlin {
             "-Xjsr305=strict",
             "-Xreturn-value-checker=full",
             "-Xconsistent-data-class-copy-visibility",
+            "-Xfull-value-classes",
         )
 
         extraWarnings.set(true)

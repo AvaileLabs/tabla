@@ -38,7 +38,7 @@ class SourceSnapshotRepository(
                 id = Uuid.generateV7(),
                 sourceUri = source.uri,
                 retrievedAt = snapshot.sourceInfo.retrievedAt,
-                content = snapshot.value.bytes
+                content = snapshot.value.bytes.toByteArray()
             )
         ) { setMode(SaveMode.INSERT_ONLY) }
     }

@@ -32,7 +32,7 @@ class NasdaqDirectoryIngestor {
 
     fun parse(file: Sourced<NasdaqDirectoryRawFile>): Sourced<DataFrame<NasdaqTradedSecurity>> {
         val rawTable = DataFrame.readCsv(
-            inputStream = ByteArrayInputStream(file.value.bytes),
+            inputStream = ByteArrayInputStream(file.value.bytes.toByteArray()),
             delimiter = '|',
             parserOptions = ParserOptions(nullStrings = setOf(""))
         ).cast<NasdaqTradedSecurity>(verify = false)

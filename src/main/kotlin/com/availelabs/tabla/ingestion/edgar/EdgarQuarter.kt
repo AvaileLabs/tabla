@@ -15,7 +15,7 @@ enum class CalendarQuarter(val number: Int) {
     }
 }
 
-data class EdgarQuarter(
+value class EdgarQuarter(
     val quarter: CalendarQuarter,
     val year: Int,
 ) {

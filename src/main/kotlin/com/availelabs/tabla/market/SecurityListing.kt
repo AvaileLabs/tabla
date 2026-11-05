@@ -1,6 +1,6 @@
 package com.availelabs.tabla.market
 
-data class SecurityListing private constructor(
+value class SecurityListing private constructor(
     val cik: Int,
     val symbols: SecuritySymbols,
     val name: String,
@@ -29,7 +29,7 @@ data class SecurityListing private constructor(
     }
 }
 
-data class SecuritySymbols private constructor(
+value class SecuritySymbols private constructor(
     val symbol: String,
     val nasdaqSymbol: String,
     val cqsSymbol: String?,
