@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDateTime
 import java.net.URI
 import kotlin.time.Instant
 
-data class DateCoverage(
+value class DateCoverage(
     val from: LocalDate,
     val to: LocalDate,
 ) {
@@ -22,20 +22,20 @@ data class DateCoverage(
  * assuming additional precision or time-zone information.
  */
 sealed interface SourceTimestamp {
-    data class Date(val value: LocalDate) : SourceTimestamp
+    value class Date(val value: LocalDate) : SourceTimestamp
 
-    data class DateTime(val value: LocalDateTime) : SourceTimestamp
+    value class DateTime(val value: LocalDateTime) : SourceTimestamp
 
-    data class Instant(val value: kotlin.time.Instant) : SourceTimestamp
+    value class Instant(val value: kotlin.time.Instant) : SourceTimestamp
 }
 
-data class SourceInfo(
+value class SourceInfo(
     val uri: URI,
     val retrievedAt: Instant,
     val createdAt: SourceTimestamp?
 )
 
-data class Sourced<T>(
+value class Sourced<T>(
     val value: T,
     val sourceInfo: SourceInfo
 )
@@ -51,11 +51,11 @@ fun <T> T.sourcedBy(
         sourceInfo = SourceInfo(uri, retrievedAt, createdAt)
     )
 
-data class HistoricalData<T>(
+value class HistoricalData<T>(
     val segments: ImmutableList<HistoricalDataSegment<T>>
 )
 
-data class HistoricalDataSegment<T>(
+value class HistoricalDataSegment<T>(
     val observations: ImmutableList<T>,
     val coverage: DateCoverage,
     val sourceInfo: SourceInfo

@@ -1,16 +1,15 @@
 package com.availelabs.tabla.ingestion.source
 
-@JvmInline
+import kotlinx.io.bytestring.ByteString
+
 value class EdgarCompanyTickersRawFile(
-    override val bytes: ByteArray
+    override val bytes: ByteString
 ) : SourceFile
 
-@JvmInline
 value class EdgarFundTickersRawFile(
-    override val bytes: ByteArray
+    override val bytes: ByteString
 ) : SourceFile
 
-@JvmInline
 value class NasdaqDirectoryRawFile(
-    override val bytes: ByteArray
+    override val bytes: ByteString
 ) : SourceFile

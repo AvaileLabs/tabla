@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
  * Configured through `EDGAR_USER_AGENT` in application.yaml.
  */
 @ConfigurationProperties(prefix = "tabla.edgar")
-data class EdgarProperties(
+value class EdgarProperties(
     val userAgent: String
 ) {
     init {

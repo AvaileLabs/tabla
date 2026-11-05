@@ -6,7 +6,7 @@ import java.util.*
 
 sealed interface IncomePayment
 
-data class CashDividend(
+value class CashDividend(
     val amount: BigDecimal,
     val currency: Currency,
     val paymentDate: LocalDate
