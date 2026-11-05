@@ -71,7 +71,9 @@ kotlin {
             "-Xjsr305=strict",
             "-Xreturn-value-checker=full",
             "-Xconsistent-data-class-copy-visibility",
-            "-Xfull-value-classes",
+            "-Xcompanion-blocks-and-extensions",
+            "-Xstrict-equality-for-structural-classes",
+            "-Xfull-value-classes"
         )
 
         extraWarnings.set(true)

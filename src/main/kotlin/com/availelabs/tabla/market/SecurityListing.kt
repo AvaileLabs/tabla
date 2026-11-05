@@ -13,7 +13,7 @@ value class SecurityListing private constructor(
         }
     }
 
-    companion object {
+    companion {
         fun of(
             cik: Int,
             symbols: SecuritySymbols,
@@ -50,7 +50,7 @@ value class SecuritySymbols private constructor(
         }
     }
 
-    companion object {
+    companion {
         fun of(
             symbol: String,
             nasdaqSymbol: String,
