@@ -6,7 +6,13 @@ import com.availelabs.tabla.ingestion.source.SourceCatalog
 import com.availelabs.tabla.ingestion.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
+import kotlinx.io.Buffer
+import kotlinx.io.asInputStream
+import kotlinx.io.asSource
+import kotlinx.io.buffered
 import kotlinx.io.bytestring.ByteString
+import kotlinx.io.readByteString
+import kotlinx.io.write
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -20,7 +26,6 @@ import org.jetbrains.kotlinx.dataframe.annotations.DataSchema
 import org.jetbrains.kotlinx.dataframe.api.cast
 import org.jetbrains.kotlinx.dataframe.api.toDataFrame
 import org.springframework.stereotype.Component
-import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
 @Component
@@ -31,11 +36,15 @@ class EdgarTickerMappingIngestor(
     val fundSource = SourceCatalog.edgarMutualFundTickers
 
     fun downloadCompanies(): Sourced<EdgarCompanyTickersRawFile> =
-        edgarClient.withResponseBody(companySource.uri) { it.readBytes() }
+        edgarClient.withResponseBody(companySource.uri) { input ->
+            input.asSource().buffered().use { it.readByteString() }
+        }
             .sourcedBy(source = companySource, retrievedAt = Clock.System.now())
 
     fun downloadFunds(): Sourced<EdgarFundTickersRawFile> =
-        edgarClient.withResponseBody(fundSource.uri) { it.readBytes() }
+        edgarClient.withResponseBody(fundSource.uri) { input ->
+            input.asSource().buffered().use { it.readByteString() }
+        }
             .sourcedBy(source = fundSource, retrievedAt = Clock.System.now())
 
     fun ingestCompanies(file: Sourced<EdgarCompanyTickersRawFile>): Sourced<DataFrame<EdgarCompanyTickerMapping>> =
@@ -54,7 +63,7 @@ class EdgarTickerMappingIngestor(
 
     @OptIn(ExperimentalSerializationApi::class)
     private fun parseResponse(snapshot: ByteString): SecTickerResponse =
-        ByteArrayInputStream(snapshot.toByteArray()).use {
+        Buffer().apply { write(snapshot) }.asInputStream().use {
             Json.decodeFromStream<SecTickerResponse>(it)
         }
 }

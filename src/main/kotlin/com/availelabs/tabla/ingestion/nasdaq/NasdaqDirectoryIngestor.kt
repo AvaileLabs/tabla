@@ -8,11 +8,16 @@ import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
+import kotlinx.io.Buffer
+import kotlinx.io.asInputStream
+import kotlinx.io.asSource
+import kotlinx.io.buffered
+import kotlinx.io.readByteString
+import kotlinx.io.write
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv
 import org.springframework.stereotype.Component
-import java.io.ByteArrayInputStream
 import kotlin.time.Clock
 
 @Component
@@ -20,8 +25,8 @@ class NasdaqDirectoryIngestor {
     val source = SourceCatalog.nasdaqDirectory
 
     fun download(): Sourced<NasdaqDirectoryRawFile> {
-        val bytes = source.uri.toURL().openStream().use {
-            it.readBytes()
+        val bytes = source.uri.toURL().openStream().asSource().buffered().use {
+            it.readByteString()
         }
 
         return bytes.sourcedBy(
@@ -31,11 +36,13 @@ class NasdaqDirectoryIngestor {
     }
 
     fun parse(file: Sourced<NasdaqDirectoryRawFile>): Sourced<DataFrame<NasdaqTradedSecurity>> {
-        val rawTable = DataFrame.readCsv(
-            inputStream = ByteArrayInputStream(file.value.bytes.toByteArray()),
-            delimiter = '|',
-            parserOptions = ParserOptions(nullStrings = setOf(""))
-        ).cast<NasdaqTradedSecurity>(verify = false)
+        val rawTable = Buffer().apply { write(file.value.bytes) }.asInputStream().use {
+            DataFrame.readCsv(
+                inputStream = it,
+                delimiter = '|',
+                parserOptions = ParserOptions(nullStrings = setOf(""))
+            ).cast<NasdaqTradedSecurity>(verify = false)
+        }
 
         val prefix = "File Creation Time:"
         val fileCreationTime = rawTable
