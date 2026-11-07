@@ -1,4 +1,4 @@
-package com.availelabs.tabla.ingestion.source
+package com.availelabs.tabla.ingestion.internal.source
 
 import kotlinx.io.bytestring.ByteString
 

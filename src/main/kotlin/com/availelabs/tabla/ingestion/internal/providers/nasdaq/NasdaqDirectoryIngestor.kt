@@ -1,19 +1,14 @@
-package com.availelabs.tabla.ingestion.nasdaq
+package com.availelabs.tabla.ingestion.internal.providers.nasdaq
 
-import com.availelabs.tabla.ingestion.source.NasdaqDirectoryRawFile
-import com.availelabs.tabla.ingestion.source.SourceCatalog
-import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.ingestion.internal.source.NasdaqDirectoryRawFile
+import com.availelabs.tabla.ingestion.internal.source.SourceCatalog
+import com.availelabs.tabla.ingestion.internal.source.sourcedBy
 import com.availelabs.tabla.provenance.SourceTimestamp
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
-import kotlinx.io.Buffer
-import kotlinx.io.asInputStream
-import kotlinx.io.asSource
-import kotlinx.io.buffered
-import kotlinx.io.readByteString
-import kotlinx.io.write
+import kotlinx.io.*
 import org.jetbrains.kotlinx.dataframe.DataFrame
 import org.jetbrains.kotlinx.dataframe.api.*
 import org.jetbrains.kotlinx.dataframe.io.readCsv

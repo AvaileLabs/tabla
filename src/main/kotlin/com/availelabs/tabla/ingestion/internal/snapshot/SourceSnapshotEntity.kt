@@ -1,4 +1,4 @@
-package com.availelabs.tabla.ingestion.snapshot
+package com.availelabs.tabla.ingestion.internal.snapshot
 
 import kotlinx.io.bytestring.ByteString
 import org.babyfish.jimmer.sql.Entity

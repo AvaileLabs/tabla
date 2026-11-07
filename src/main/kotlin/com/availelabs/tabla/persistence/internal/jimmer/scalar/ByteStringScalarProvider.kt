@@ -1,4 +1,4 @@
-package com.availelabs.tabla.persistence.jimmer.scalar
+package com.availelabs.tabla.persistence.internal.jimmer.scalar
 
 import kotlinx.io.bytestring.ByteString
 import org.babyfish.jimmer.sql.runtime.ScalarProvider

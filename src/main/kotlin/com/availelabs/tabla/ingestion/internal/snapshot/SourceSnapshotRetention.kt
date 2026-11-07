@@ -1,6 +1,6 @@
-package com.availelabs.tabla.ingestion.snapshot
+package com.availelabs.tabla.ingestion.internal.snapshot
 
-import com.availelabs.tabla.ingestion.source.SourceCatalog
+import com.availelabs.tabla.ingestion.internal.source.SourceCatalog
 import kotlinx.collections.immutable.persistentHashMapOf
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -12,9 +12,9 @@ class SourceSnapshotRetention(
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val policies = persistentHashMapOf(
-        SourceCatalog.nasdaqDirectory.uri to 365,
-        SourceCatalog.edgarCompanyTickers.uri to 10,
-        SourceCatalog.edgarMutualFundTickers.uri to 10
+        SourceCatalog.nasdaqDirectory.uri to 45,
+        SourceCatalog.edgarCompanyTickers.uri to 1,
+        SourceCatalog.edgarMutualFundTickers.uri to 1
     )
 
     fun run() {
