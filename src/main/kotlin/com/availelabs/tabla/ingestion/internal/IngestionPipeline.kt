@@ -2,6 +2,7 @@ package com.availelabs.tabla.ingestion.internal
 
 import com.availelabs.tabla.ingestion.internal.providers.edgar.EdgarTickerMappingIngestor
 import com.availelabs.tabla.ingestion.internal.providers.nasdaq.NasdaqDirectoryIngestor
+import com.availelabs.tabla.ingestion.internal.reconciliation.SecurityListingReconciler
 import com.availelabs.tabla.ingestion.internal.snapshot.SourceSnapshotRepository
 import com.availelabs.tabla.ingestion.internal.snapshot.SourceSnapshotRetention
 import com.availelabs.tabla.ingestion.internal.source.SnapshotSource
@@ -36,7 +37,7 @@ class IngestionPipeline(
         if (fundsSnapshot == null) return
         val fundsDf = edgarIngestor.ingestMutualFunds(fundsSnapshot).value
 
-
+        SecurityListingReconciler(nasdaqDf, companiesDf).reconcile()
     }
 
     private fun <T : SourceFile> downloadIfStale(
