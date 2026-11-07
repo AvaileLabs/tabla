@@ -1,4 +1,4 @@
-package com.availelabs.tabla.ingestion.edgar
+package com.availelabs.tabla.ingestion.internal.providers.edgar
 
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component

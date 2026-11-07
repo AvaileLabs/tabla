@@ -1,18 +1,13 @@
-package com.availelabs.tabla.ingestion.edgar
+package com.availelabs.tabla.ingestion.internal.providers.edgar
 
-import com.availelabs.tabla.ingestion.source.EdgarCompanyTickersRawFile
-import com.availelabs.tabla.ingestion.source.EdgarFundTickersRawFile
-import com.availelabs.tabla.ingestion.source.SourceCatalog
-import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.ingestion.internal.source.EdgarCompanyTickersRawFile
+import com.availelabs.tabla.ingestion.internal.source.EdgarFundTickersRawFile
+import com.availelabs.tabla.ingestion.internal.source.SourceCatalog
+import com.availelabs.tabla.ingestion.internal.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
-import kotlinx.io.Buffer
-import kotlinx.io.asInputStream
-import kotlinx.io.asSource
-import kotlinx.io.buffered
+import kotlinx.io.*
 import kotlinx.io.bytestring.ByteString
-import kotlinx.io.readByteString
-import kotlinx.io.write
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

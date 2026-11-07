@@ -1,4 +1,4 @@
-package com.availelabs.tabla.ingestion.source
+package com.availelabs.tabla.ingestion.internal.source
 
 import com.availelabs.tabla.provenance.SourceTimestamp
 import com.availelabs.tabla.provenance.Sourced

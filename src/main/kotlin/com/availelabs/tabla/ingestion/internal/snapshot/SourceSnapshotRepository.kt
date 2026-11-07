@@ -1,10 +1,10 @@
-package com.availelabs.tabla.ingestion.snapshot
+package com.availelabs.tabla.ingestion.internal.snapshot
 
 import com.availelabs.tabla.ingestion.APP_TIME_ZONE
-import com.availelabs.tabla.ingestion.snapshot.dto.SourceSnapshotInput
-import com.availelabs.tabla.ingestion.source.SnapshotSource
-import com.availelabs.tabla.ingestion.source.SourceFile
-import com.availelabs.tabla.ingestion.source.sourcedBy
+import com.availelabs.tabla.ingestion.internal.snapshot.dto.SourceSnapshotInput
+import com.availelabs.tabla.ingestion.internal.source.SnapshotSource
+import com.availelabs.tabla.ingestion.internal.source.SourceFile
+import com.availelabs.tabla.ingestion.internal.source.sourcedBy
 import com.availelabs.tabla.provenance.Sourced
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList

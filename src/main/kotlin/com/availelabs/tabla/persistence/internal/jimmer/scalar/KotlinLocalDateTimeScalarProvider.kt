@@ -1,4 +1,4 @@
-package com.availelabs.tabla.persistence.jimmer.scalar
+package com.availelabs.tabla.persistence.internal.jimmer.scalar
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.toJavaLocalDateTime

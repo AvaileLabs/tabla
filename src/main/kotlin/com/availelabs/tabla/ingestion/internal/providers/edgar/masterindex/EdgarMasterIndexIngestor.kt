@@ -1,6 +1,6 @@
-package com.availelabs.tabla.ingestion.edgar.masterindex
+package com.availelabs.tabla.ingestion.internal.providers.edgar.masterindex
 
-import com.availelabs.tabla.ingestion.edgar.EdgarClient
+import com.availelabs.tabla.ingestion.internal.providers.edgar.EdgarClient
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
 import org.jetbrains.kotlinx.dataframe.DataFrame
