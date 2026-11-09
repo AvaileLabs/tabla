@@ -1,0 +1,5 @@
+export com.availelabs.tabla.market.nasdaq.internal.NasdaqDirectoryEntryEntity
+
+input NasdaqDirectoryEntryInput {
+    #allScalars(this)
+}

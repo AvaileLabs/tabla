@@ -1,10 +1,10 @@
-package com.availelabs.tabla.market
+package com.availelabs.tabla.market.sec.fund
 
 value class FundShareClass private constructor(
     val cik: Int,
     val seriesId: String,
     val classId: String,
-    val symbol: String
+    val symbol: String?
 ) {
     init {
         require(cik > 0) {
@@ -16,11 +16,8 @@ value class FundShareClass private constructor(
         require(CLASS_ID.matches(classId)) {
             "Invalid fund class ID"
         }
-        require(
-            symbol.isNotEmpty() &&
-                    symbol == symbol.trim().uppercase()
-        ) {
-            "Symbol must be non-empty and normalized"
+        require(symbol == null || (symbol.isNotEmpty() && symbol == symbol.trim().uppercase())) {
+            "Symbol must be non-empty and normalized when present"
         }
     }
 
@@ -32,13 +29,13 @@ value class FundShareClass private constructor(
             cik: Int,
             seriesId: String,
             classId: String,
-            symbol: String
+            symbol: String?
         ): FundShareClass =
             FundShareClass(
                 cik = cik,
                 seriesId = seriesId.trim().uppercase(),
                 classId = classId.trim().uppercase(),
-                symbol = symbol.trim().uppercase()
+                symbol = symbol?.trim()?.uppercase()?.takeIf { it.isNotEmpty() }
             )
     }
 }

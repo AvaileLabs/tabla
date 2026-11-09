@@ -1,5 +1,0 @@
-export com.availelabs.tabla.market.internal.SecurityListingEntity
-
-input SecurityListingInput {
-    #allScalars(this)
-}

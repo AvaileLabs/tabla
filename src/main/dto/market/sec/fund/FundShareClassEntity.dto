@@ -1,0 +1,5 @@
+export com.availelabs.tabla.market.sec.fund.internal.FundShareClassEntity
+
+input FundShareClassInput {
+    #allScalars(this)
+}

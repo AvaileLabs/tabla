@@ -1,0 +1,5 @@
+export com.availelabs.tabla.market.sec.company.internal.SecCompanyTickerEntity
+
+input SecCompanyTickerInput {
+    #allScalars(this)
+}

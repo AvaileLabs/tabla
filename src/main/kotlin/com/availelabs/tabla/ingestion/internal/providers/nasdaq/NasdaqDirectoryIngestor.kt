@@ -3,9 +3,14 @@ package com.availelabs.tabla.ingestion.internal.providers.nasdaq
 import com.availelabs.tabla.ingestion.internal.source.NasdaqDirectoryRawFile
 import com.availelabs.tabla.ingestion.internal.source.SourceCatalog
 import com.availelabs.tabla.ingestion.internal.source.sourcedBy
+import com.availelabs.tabla.market.nasdaq.ListingExchange
+import com.availelabs.tabla.market.nasdaq.NasdaqDirectoryEntry
+import com.availelabs.tabla.market.nasdaq.NasdaqSymbols
 import com.availelabs.tabla.provenance.SourceTimestamp
 import com.availelabs.tabla.provenance.Sourced
 import com.availelabs.tabla.provenance.sourcedBy
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.format.char
 import kotlinx.io.*
@@ -30,7 +35,7 @@ class NasdaqDirectoryIngestor {
         )
     }
 
-    fun parse(file: Sourced<NasdaqDirectoryRawFile>): Sourced<DataFrame<NasdaqTradedSecurity>> {
+    fun parse(file: Sourced<NasdaqDirectoryRawFile>): Sourced<ImmutableList<NasdaqDirectoryEntry>> {
         val rawTable = Buffer().apply { write(file.value.bytes) }.asInputStream().use {
             DataFrame.readCsv(
                 inputStream = it,
@@ -61,10 +66,40 @@ class NasdaqDirectoryIngestor {
             .remove { testIssue }
             .cast<NasdaqTradedSecurity>(verify = true)
 
-        return df.sourcedBy(
+        val listings = df.map { row ->
+            NasdaqDirectoryEntry.of(
+                symbols = NasdaqSymbols.of(row.symbol, row.nasdaqSymbol, row.cqsSymbol),
+                name = row.securityName,
+                exchange = when (row.listingExchange) {
+                    'Q' -> ListingExchange.NASDAQ
+                    'A' -> ListingExchange.NYSE_AMERICAN
+                    'N' -> ListingExchange.NYSE
+                    'P' -> ListingExchange.NYSE_ARCA
+                    'Z' -> ListingExchange.CBOE_BZX
+                    'V' -> ListingExchange.IEX
+                    'F' -> ListingExchange.TXSE
+                    'M' -> ListingExchange.NYSE_TEXAS
+                    else -> error("Unknown listing exchange '${row.listingExchange}' for ${row.symbol}")
+                },
+                nasdaqTraded = row.nasdaqTraded.toFlag(),
+                etf = row.etf.toString().toFlag(),
+                roundLotSize = row.roundLotSize,
+                marketCategory = row.marketCategory,
+                financialStatus = row.financialStatus,
+                nextShares = row.nextShares.toString().toFlag()
+            )
+        }.toImmutableList()
+
+        return listings.sourcedBy(
             uri = file.sourceInfo.uri,
             retrievedAt = file.sourceInfo.retrievedAt,
             createdAt = SourceTimestamp.DateTime(fileCreationTime)
         )
     }
+}
+
+private fun String.toFlag(): Boolean = when (this) {
+    "Y" -> true
+    "N" -> false
+    else -> error("Unknown NASDAQ flag '$this'")
 }
