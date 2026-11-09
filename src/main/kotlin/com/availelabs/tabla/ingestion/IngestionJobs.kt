@@ -9,11 +9,8 @@ class IngestionJobs(
     private val pipeline: IngestionPipeline,
     private val dailyIngestion: DailyIngestionScheduler
 ) {
-    fun ingestNow() {
-        pipeline.run()
-    }
+    fun ingestNow() = pipeline.run()
 
-    fun scheduleIngestionForToday() {
+    fun scheduleIngestionForToday() =
         dailyIngestion.scheduleToday()
-    }
 }

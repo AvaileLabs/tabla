@@ -24,12 +24,10 @@ fun main(args: Array<String>) {
 class ApplicationLifecycle(
     private val ingestion: IngestionJobs
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments) {
+    override fun run(args: ApplicationArguments) =
         ingestion.ingestNow()
-    }
 
     @Scheduled(cron = "@daily", zone = APP_TIME_ZONE_ID)
-    fun runDailyTasks() {
+    fun runDailyTasks() =
         ingestion.scheduleIngestionForToday()
-    }
 }

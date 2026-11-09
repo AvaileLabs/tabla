@@ -2,6 +2,19 @@ spring:
   application:
     name: tabla
 
+  ai:
+    mcp:
+      server:
+        name: tabla
+        type: SYNC
+        protocol: MODERN
+        capabilities:
+          resource: false
+          prompt: false
+          completion: false
+        modern:
+          subscriptions: false
+
   docker:
     compose:
       lifecycle-management: start_only

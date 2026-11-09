@@ -65,10 +65,8 @@ class IngestionPipeline(
         source: SnapshotSource<T>,
         download: () -> Sourced<T>
     ): Sourced<T> {
-        if (repository.wasRetrievedToday(source)) {
-            return repository.latestOf(source)
-                ?: error("Snapshot missing: ${source.uri}")
-        }
+        if (repository.wasRetrievedToday(source))
+            return repository.latestOf(source) ?: error("Snapshot missing: ${source.uri}")
 
         val file = download()
         repository.save(source, file)
