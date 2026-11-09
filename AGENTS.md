@@ -22,6 +22,7 @@ relevant implementation before proposing changes.
 
 ## Agent-specific workflow
 
+- Check the Kotlin version in `gradle/libs.versions.toml` and compiler flags in `build.gradle.kts`.
 - Discover and use relevant IntelliJ IDEA agent skills and tools when available. If IntelliJ IDEA's MCP server is
   unavailable, ask the user to enable it.
 - Reuse the JDK provisioned for this project's Gradle toolchain under `GRADLE_USER_HOME/jdks`
