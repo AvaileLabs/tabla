@@ -38,3 +38,10 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Android / Apple / Web ###
+local.properties
+.DS_Store
+xcuserdata/
+DerivedData/
+node_modules/

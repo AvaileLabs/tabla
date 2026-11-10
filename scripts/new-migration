@@ -14,7 +14,7 @@ project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 # Generate UTC timestamp and migration path
 timestamp="$(date -u +%Y%m%d%H%M%S)"
-migration_root="$project_root/src/main/resources/db/migration"
+migration_root="$project_root/server/src/main/resources/db/migration"
 directory="$migration_root/${timestamp:0:4}/${timestamp:4:2}"
 filename="V${timestamp}__${description}.sql"
 filepath="$directory/$filename"
