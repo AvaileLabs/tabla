@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
@@ -32,6 +33,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":app:shared"))
+    implementation(projects.app.shared)
     implementation(libs.androidx.activity.compose)
 }

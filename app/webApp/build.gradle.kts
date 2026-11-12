@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.kotlin.compose)
@@ -11,7 +12,7 @@ kotlin {
     }
     sourceSets {
         wasmJsMain.dependencies {
-            implementation(project(":app:shared"))
+            implementation(projects.app.shared)
             implementation(libs.compose.ui)
         }
     }

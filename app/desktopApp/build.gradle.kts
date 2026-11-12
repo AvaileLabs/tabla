@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose)
     alias(libs.plugins.kotlin.compose)
@@ -9,7 +10,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":app:shared"))
+    implementation(projects.app.shared)
     implementation(libs.compose.ui)
     implementation(libs.kotlinx.coroutines.swing)
 }

@@ -1,7 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmDefaultMode
 import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
+    alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.spring)
     alias(libs.plugins.kotlin.dataframe)
@@ -23,7 +23,7 @@ java {
 }
 
 dependencies {
-    implementation(project(":core"))
+    implementation(projects.core)
 
     // Dependency management (BOMs)
     implementation(platform(libs.springBoot.bom))
@@ -65,24 +65,6 @@ dependencies {
     testImplementation(libs.springBoot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
     testRuntimeOnly(libs.junit.platformLauncher)
-}
-
-kotlin {
-    compilerOptions {
-        jvmDefault.set(JvmDefaultMode.NO_COMPATIBILITY)
-
-        freeCompilerArgs.addAll(
-            "-Xjsr305=strict",
-            "-Xreturn-value-checker=full",
-            "-Xconsistent-data-class-copy-visibility",
-            "-Xcompanion-blocks-and-extensions",
-            "-Xstrict-equality-for-structural-classes",
-            "-Xfull-value-classes"
-        )
-
-        extraWarnings.set(true)
-        progressiveMode.set(true)
-    }
 }
 
 tasks.matching { it.name == "kspKotlin" }.configureEach {

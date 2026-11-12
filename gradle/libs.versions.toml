@@ -7,7 +7,7 @@ android-targetSdk = "37"
 androidxActivity = "1.14.0-alpha03"
 compose = "1.13.0-beta02"
 coroutines = "1.11.0"
-kotlin = "2.5.0-Beta2"
+kotlin = "2.5.0-RC"
 springBoot = "4.2.0-RC2"
 springAi = "2.1.0-RC2"
 springModulith = "2.2.0-RC1"
@@ -19,6 +19,7 @@ kotlinxImmutable = "0.5.2"
 kotlinxIo = "0.9.2"
 
 [libraries]
+kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidxActivity" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
@@ -56,6 +57,7 @@ springBoot-configurationProcessor = { module = "org.springframework.boot:spring-
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json" }
 
 [plugins]
+tabla-kotlin-conventions = { id = "tabla.kotlin-conventions" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-multiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }

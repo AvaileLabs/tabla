@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.multiplatformLibrary)
     alias(libs.plugins.compose)
@@ -31,10 +32,12 @@ kotlin {
     }
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":core"))
+            implementation(projects.core)
             implementation(libs.compose.runtime)
             implementation(libs.compose.ui)
             implementation(libs.compose.foundation)
+
+            implementation(libs.kotlinx.collections.immutable)
         }
     }
 }
