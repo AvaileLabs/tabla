@@ -15,13 +15,6 @@ group = "com.availelabs"
 version = "0.0.1-SNAPSHOT"
 description = "tabla"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(27)
-        vendor = JvmVendorSpec.ADOPTIUM
-    }
-}
-
 dependencies {
     implementation(projects.core)
 
