@@ -4,10 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-kotlin {
-    jvmToolchain(25)
-}
-
 android {
     namespace = "com.availelabs.tabla.app"
     compileSdk {
@@ -22,10 +18,6 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
         compose = true

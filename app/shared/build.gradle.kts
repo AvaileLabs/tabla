@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.tabla.kotlin.conventions)
     alias(libs.plugins.kotlin.multiplatform)
@@ -9,7 +7,6 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(25)
     jvm()
     listOf(iosArm64(), iosSimulatorArm64()).forEach {
         it.binaries.framework {
@@ -28,7 +25,6 @@ kotlin {
             }
         }
         minSdk = libs.versions.android.minSdk.get().toInt()
-        compilerOptions.jvmTarget = JvmTarget.JVM_21
     }
     sourceSets {
         commonMain.dependencies {

@@ -5,10 +5,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-kotlin {
-    jvmToolchain(25)
-}
-
 dependencies {
     implementation(projects.app.shared)
     implementation(libs.compose.ui)
