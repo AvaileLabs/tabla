@@ -37,7 +37,7 @@ value class Watchlist private constructor(
     }
 }
 
-value class Security private constructor(
+value class Security(
     val id: Uuid,
     val name: String,
     val exchange: String

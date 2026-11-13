@@ -9,6 +9,10 @@ services:
       POSTGRES_USER: tabla
       POSTGRES_PASSWORD: tabla
 
+    configs:
+      - source: keycloak_database
+        target: /docker-entrypoint-initdb.d/keycloak.sql
+
     ports:
       - target: 5432
         host_ip: 127.0.0.1
@@ -20,3 +24,44 @@ services:
       test: [ "CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\"" ]
       start_interval: 1s
       start_period: 30s
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2
+    command: start-dev
+
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+
+      KC_HEALTH_ENABLED: "true"
+
+    ports:
+      - target: 8080
+        host_ip: 127.0.0.1
+
+    mem_limit: 1g
+
+    tmpfs:
+      - /opt/keycloak/data
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: [ "CMD", "bash", "-ec", "{ printf 'HEAD /health/ready HTTP/1.0\\r\\n\\r\\n' >&0; grep -q 'HTTP/1.0 200'; } 0<>/dev/tcp/127.0.0.1/9000" ]
+      start_interval: 1s
+      start_period: 60s
+
+configs:
+  keycloak_database:
+    content: |
+      create role keycloak with login password 'keycloak';
+      create database keycloak owner keycloak;
