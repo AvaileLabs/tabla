@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.dataframe)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kotlin.kapt)
-    alias(libs.plugins.springBoot)
+    alias(libs.plugins.spring.boot)
     alias(libs.plugins.ksp)
 }
 
@@ -19,21 +19,23 @@ dependencies {
     implementation(projects.core)
 
     // Dependency management (BOMs)
-    implementation(platform(libs.springBoot.bom))
-    implementation(platform(libs.springAi.bom))
-    implementation(platform(libs.springModulith.bom))
-    kapt(platform(libs.springBoot.bom))
-    developmentOnly(platform(libs.springBoot.bom))
+    implementation(platform(libs.spring.boot.dependencies))
+    implementation(platform(libs.spring.ai.bom))
+    implementation(platform(libs.spring.modulith.bom))
+    kapt(platform(libs.spring.boot.dependencies))
+    developmentOnly(platform(libs.spring.boot.dependencies))
 
     // Spring Boot
-    implementation(libs.springBoot.starter)
-    implementation(libs.springBoot.starterRestClient)
-    implementation(libs.springBoot.starterActuator)
-    implementation(libs.springAi.starterMcpServerWebmvc)
-    implementation(libs.springModulith.starterCore)
-    runtimeOnly(libs.springModulith.runtime)
-    kapt(libs.springBoot.configurationProcessor)
-    developmentOnly(libs.springBoot.dockerCompose)
+    implementation(libs.spring.boot.starter)
+    implementation(libs.spring.boot.starter.restclient)
+    implementation(libs.spring.boot.starter.actuator)
+    implementation(libs.spring.ai.starter.mcp.server.webmvc)
+    implementation(libs.spring.modulith.starter.core)
+    implementation(libs.spring.boot.starter.security.oauth2.client)
+    implementation(libs.spring.boot.starter.security.oauth2.resource.server)
+    runtimeOnly(libs.spring.modulith.runtime)
+    kapt(libs.spring.boot.configuration.processor)
+    developmentOnly(libs.spring.boot.docker.compose)
 
     // Kotlin
     implementation(libs.kotlin.reflect)
@@ -42,22 +44,22 @@ dependencies {
     implementation(libs.kotlinx.io.bytestring)
     implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.dataframe)
+    implementation(libs.dataframe)
 
     // Persistence and database migrations
-    implementation(libs.jimmer.springBootStarter)
-    implementation(libs.springBoot.starterFlyway)
+    implementation(libs.jimmer.spring.boot.starter)
+    implementation(libs.spring.boot.starter.flyway)
     ksp(libs.jimmer.ksp)
     runtimeOnly(libs.postgresql)
-    runtimeOnly(libs.flyway.postgresql)
+    runtimeOnly(libs.flyway.database.postgresql)
 
     // Testing
-    testImplementation(libs.springBoot.starterTest)
-    testImplementation(libs.kotlin.testJunit5)
-    testImplementation(libs.springModulith.starterTest)
-    testImplementation(libs.springBoot.testcontainers)
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.spring.modulith.starter.test)
+    testImplementation(libs.spring.boot.testcontainers)
     testImplementation(libs.testcontainers.postgresql)
-    testRuntimeOnly(libs.junit.platformLauncher)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks.matching { it.name == "kspKotlin" }.configureEach {

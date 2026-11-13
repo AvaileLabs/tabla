@@ -14,6 +14,7 @@ relevant implementation before proposing changes.
 - Utilize `kotlinx.collections.immutable` for application-owned collections; confine mutation to implementation details.
 - Prefer declarative, expression-oriented Kotlin over imperative loops and mutable accumulators when it improves code
   readability.
+- Match version catalog library aliases exactly to artifact names. Use kebab-case for all catalog aliases.
 
 ## Database migrations
 
