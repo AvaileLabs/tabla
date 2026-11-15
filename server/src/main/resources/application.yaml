@@ -15,6 +15,12 @@ spring:
         modern:
           subscriptions: false
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
   docker:
     compose:
       lifecycle-management: start_only
@@ -37,4 +43,4 @@ jimmer:
 
 tabla:
   edgar:
-    user-agent: ${EDGAR_USER_AGENT:}
+    user-agent: ${EDGAR_USER_AGENT}
