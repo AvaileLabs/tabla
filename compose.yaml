@@ -44,6 +44,7 @@ services:
 
     ports:
       - target: 8080
+        published: 8180
         host_ip: 127.0.0.1
 
     mem_limit: 1g
