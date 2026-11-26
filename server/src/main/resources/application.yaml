@@ -2,16 +2,19 @@ spring:
   application:
     name: tabla
 
+  mvc:
+    apiversion:
+      use:
+        header: API-Version
+    problemdetails:
+      enabled: true
+
   ai:
     mcp:
       server:
         name: tabla
         type: SYNC
         protocol: MODERN
-        capabilities:
-          resource: false
-          prompt: false
-          completion: false
         modern:
           subscriptions: false
 
@@ -19,7 +22,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/tabla}
 
   docker:
     compose:
